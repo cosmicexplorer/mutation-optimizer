@@ -1,0 +1,16 @@
+{
+  "name": "mutation-optimizer",
+  "version": "0.0.0",
+  "license": "GPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/cosmicexplorer/mutation-optimizer.git"
+  },
+  "devDependencies": {
+    "browserify": "^10.2.6",
+    "coffee-react": "^4.0.0",
+    "less": "^2.5.1",
+    "react": "^0.13.3",
+    "uglify-js": "^2.4.23"
+  }
+}

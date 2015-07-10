@@ -1,0 +1,25 @@
+{
+  "html": {
+    "allowed_file_extensions": ["htm", "html", "xhtml", "shtml", "xml", "svg"],
+    "brace_style": "collapse",
+    "end_with_newline": true,
+    "indent_char": " ",
+    "indent_handlebars": false,
+    "indent_inner_html": false,
+    "indent_scripts": "normal",
+    "indent_size": 2,
+    "max_preserve_newlines": 0,
+    "preserve_newlines": false,
+    "unformatted": ["a", "span", "img", "code", "pre", "sub", "sup", "em", "strong", "b", "i", "u", "strike", "big", "small", "pre", "h1", "h2", "h3", "h4", "h5", "h6"],
+    "wrap_line_length": 70
+  },
+  "css": {
+    "allowed_file_extensions": ["css", "scss", "sass", "less"],
+    "end_with_newline": true,
+    "indent_char": " ",
+    "indent_size": 2,
+    "newline_between_rules": true,
+    "selector_separator": " ",
+    "selector_separator_newline": true
+  }
+}
