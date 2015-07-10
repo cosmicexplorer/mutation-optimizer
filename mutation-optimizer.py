@@ -1,74 +1,64 @@
-IUPAC_standard_syms_one_letter = ['W','L','P','H','Q','R','I','M','T','N',
-                                  'K','S','V', 'A','D','E','G','F','Y','C',
-                                  '-']
-IUPAC_standard_syms_five_letters = ['A','T','G','C','U','R','Y','N']
+#CONSIDER CHANGING CODON OPTOMIZATION TO 'BLACKLIST' OF LIMITING tRNA
+#CHECK BIOBRICK COMPATIBILITY
 
-def aa_seq_check(aa_seq_input):
-    """Verifies valid user input for amino acid sequence, using one-letter
-    abbreviations"""
-    aa_seq = list(''.join(aa_seq_input).upper())
-    for i in range(0, len(aa_seq)):
-        # Possible ways to represent stop codons in amino acid sequence
-        if aa_seq[i] in ['*','X','-']:
-            aa_seq[i] = '-'
-        if aa_seq[i] not in IUPAC_standard_syms:
-            print('The sequence entered contained symbols not included in the'
-                  '1-letter IUPAC standard')
+def aa_seq_check(aa_seq):               #Verifies valid user input for amino acid sequence, using one-letter abbreviations
+    aa_seq=''.join(aa_seq)
+    aa_seq=aa_seq.upper()
+    aa_seq=list(aa_seq)
+    for i in range(0,len(aa_seq)):
+        if aa_seq[i] in ['*','X','-']:      #Possible ways to represent stop codons in amino acid sequence
+            aa_seq[i]='-'
+        if aa_seq[i] not in ['W','L','P','H','Q','R','I','M','T','N','K','S','V','A','D','E','G','F','Y','C','-']:
+            print('The sequence entered contained symbols not included in the 1-letter IUPAC standard')
             raise SystemExit
-    if aa_seq[len(aa_seq) - 1] != '-':
+    if aa_seq[len(aa_seq)-1]!='-':
         aa_seq.append('-')
-    # Certain amino acid sequences omit the M start codon
-    if aa_seq[0] != 'M':
-        aa_seq.append('M')
+    if aa_seq[0]!='M':              #Certain amino acid sequences omit the M start codon
+        aa_sq=['M']
+        for aa in aa_seq:
+            aa_sq.append(aa)
+        aa_seq=aa_sq
     return aa_seq
 
-CODON_LENGTH = 3
-START_CODON = 'ATG'
-STOP_CODONS = ['TGA','TAG','TAA']
-
-def dna_seq_check(dna_seq_input):
-    """Verifies valid user input for DNA sequence. All functions assume a simple
-    ORF, beginning with start codon and ending with stop."""
-    dna_seq = ''.join(dna_seq_input).upper()
+def dna_seq_check(dna_seq):         #Verifies valid user input for DNA sequence. All functions assume a simple ORF, beginning with start codon and ending with stop
+    dna_seq=''.join(dna_seq)
+    dna_seq=dna_seq.upper()
+    dna_seq=list(dna_seq)
     for i in range(0,len(dna_seq)):
-        # Convert RNA to DNA
-        if dna_seq[i] == 'U':
-            dna_seq[i] = 'T'
-            print("The sequence had a Uracil at position %d changed to"
-                  "Thymine."%i, file=sys.stderr)
-        if dna_seq[i] not in IUPAC_standard_syms_five_letters:
-            print('The sequence entered contained symbols not included in the'
-                  '5-letter IUPAC standard: %d'%dna_seq[i])
+        if dna_seq[i]=='U':                 #Convert RNA to DNA
+            dna_seq[i]='T'
+            print('The sequence had a Uracil at position %d changed to Thymine.'%i)
+        elif dna_seq[i] not in ['A','T','G','C','U','R','Y','N']:
+            print('The sequence entered contained symbols not included in the 5-letter IUPAC standard')
             raise SystemExit
-    if len(dna_seq) == 0:
+    if len(dna_seq)==0:
         print('No sequence was entered')
         raise SystemExit
-    if (len(dna_seq) % CODON_LENGTH) != 0:
+    if len(dna_seq)%3!=0:
         print('The sequence entered does not have all codons in reading frame')
         raise SystemExit
-    initial_codon = dna_seq[0:CODON_LENGTH]
-    if (initial_codon != START_CODON:
+    if dna_seq[0]+dna_seq[1]+dna_seq[2]!='ATG':
         print('The sequence entered does not begin with a start codon')
         raise SystemExit
-    final_codon = dna_seq[-3:len(dna_seq)]
-    if final_codon not in STOP_CODONS:
-        print(final_codon)
+    if dna_seq[-3]+dna_seq[-2]+dna_seq[-1] not in ['TGA','TAG','TAA']:
+        print(dna_seq[-3]+dna_seq[-2]+dna_seq[-1])
         print('The sequence entered does not end with a stop codon')
         raise SystemExit
-    # ORF can only have one in-frame stop codon, located at the last position
-    stop_codon_indices = [dna_seq.find(stop) for stop in STOP_CODONS]
-    for stop_codon_index in stop_codon_indices:
-        if (stop_codon_index != -1 and
-            (stop_codon_index % CODON_LENGTH) == 0 and
-            stop_codon_index < (len(dna_seq) - CODON_LENGTH)):
-        print('The sequence entered contained a premature stop codon at '
-              'position %d'%stop_codon_index)
+    dna_string=''.join(dna_seq)                     #ORF can only have one in-frame stop codon, located at the last position
+    if dna_string.find('TGA')<len(dna_string)-3 and dna_string.find('TGA')!=-1 and dna_string.find('TGA')%3==0:
+        print('The sequence entered contained a premature stop codon at position %d'%dna_string.find('TGA'))
         raise SystemExit
-    return list(dna_seq)
+    if dna_string.find('TAG')<len(dna_string)-3 and dna_string.find('TAG')!=-1 and dna_string.find('TAG')%3==0:
+        print('The sequence entered contained a premature stop codon at position %d'%dna_string.find('TAG'))
+        raise SystemExit
+    if dna_string.find('TAA')<len(dna_string)-3 and dna_string.find('TAA')!=-1 and dna_string.find('TAA')%3==0:
+        print('The sequence entered contained a premature stop codon at position %d'%dna_string.find('TAA'))
+        raise SystemExit
+    return dna_seq
 
-def codon_translation(codon):   # Can replace later with codon dictionary below
-    if codon=='ATG':            # assigns each codon to one-letter amino acid
-         return 'M'
+def codon_translation(codon):       #Can replace later with codon dictionary bellow
+    if codon=='ATG':            #assigns each codon to one-letter amino acid
+        return 'M'
     if codon in ['ATA','ATC','ATT']:
         return 'I'
     if codon in ['ACT','ACC','ACA','ACG']:
@@ -421,8 +411,8 @@ def deamination_sites(dna_seq):
 def alkylation_sites(dna_seq):
     return dna_seq.count('RG')+dna_seq.count('GG')+dna_seq.count('AG')
 
-def oxidation_sites(dna_seq):
-    return dna_seq.count('GGA')
+def oxidation_sites(dna_seq):           #Consider simply minimizing number of G
+    return dna_seq.count('GGG')+dna_seq.count('GG')
 
 def misc_other_sites(dna_seq):
     return dna_seq.count('YTG')+dna_seq.count('TTG')+dna_seq.count('CTG')+dna_seq.count('GTGG')+dna_seq.count('GGCGCC')
@@ -447,12 +437,14 @@ def read_ApE(filename):
         raise SystemExit
     filehandle=open(filename,'r')
     sequence=[]
-    for i in range(10):         #This only works with files without any part features. It would be good to find a general solution that always finds the start of the DNA sequence, even if it happens not to be on line 11 of the file
-        next(filehandle)
+    start_seq=False
     for line in filehandle:
-        for i in line:
-            if i in ['a','t','g','c','u','A','T','G','C','U']:
-                sequence.append(i)
+        if start_seq==True:
+            for i in line:
+                if i in ['a','t','g','c','u','n','A','T','G','C','U','N']:
+                    sequence.append(i)
+        if 'ORIGIN' in line:
+            start_seq=True
     filehandle.close()
     return sequence
 
@@ -467,8 +459,8 @@ def write_ApE(filename,sequence):
 
 
 #Command line testing script that shows the output for when GFP is optomized
-'''
-print('Enter amino acid sequence in one-letter FASTA format: ')     #in actual version would be input('Enter amino acid sequence in one-letter FASTA format: ')
+
+print('Enter amino acid sequence in one-letter FAFSTA format: ')     #in actual version would be input('Enter amino acid sequence in one-letter FAFSTA format: ')
 aa_seq='MSKGEELFTGVVPILVELDGDVNGHKFSVSGEGEGDATYGKLTLKFICTTGKLPVPWPTLVTTFSYGVQCFSRYPDHMKQHDFFKSAMPEGYVQERTIFFKDDGNYKTRAEVKFEGDTLVNRIELKGIDFKEDGNILGHKLEYNYNSHNVYIMADKQKNGIKVNFKIRHNIEDGSVQLADHYQQNTPIGDGPVLLPDNHYLSTQSALSKDPNEKRDHMVLLEFVTAAGITHGMDELYK-'
 print('Input amino acid sequence: ')
 for i in range(0,len(aa_seq)//60):
@@ -490,4 +482,3 @@ print('Number of homologies greater than six bases: %d'%(homology_repeats(optomi
 print('Number of oxidation, alkylation, and deamination prone sites: %d'%(oxidation_sites(optomized)+alkylation_sites(optomized)+deamination_sites(optomized)+misc_other_sites(optomized)))
 print('Number Insertion Sequences or potential hairpins: %d'%(hairpin_sites(optomized)+insertion_sequences(optomized)))
 input('Press ENTER to exit.')
-'''
