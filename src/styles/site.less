@@ -1,0 +1,66 @@
+.container-fluid {
+  padding-top: 15px;
+}
+
+.scrollable-content {
+  overflow-y: auto;
+}
+
+@main-row-height: 300px;
+.tall-object {
+  height: @main-row-height;
+}
+
+@short-row-height: 100px;
+.short-object {
+  height: @short-row-height;
+}
+
+div.display-item {
+  margin-bottom: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+  justify-content: flex-start;
+  div.list-group {
+    flex-grow: 1;
+    border-top-left-radius: 0;
+    .list-group-item {
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+    }
+    .scrollable-content;
+    // disgusting hack, needs to be changed if row height changed
+    max-height: 87%;
+  }
+  border-radius: 5px;
+  div.input-group {
+    input {
+      border-bottom: 1px solid #555;
+      border-radius: 5px 5px 0 0;
+    }
+    button {
+      border-bottom-right-radius: 0;
+    }
+  }
+  box-shadow: 10px 10px 28px 2px rgba(0, 0, 0, 0.75);
+  > div.panel {
+    height: 100%;
+    div.panel-heading div.btn-group {
+      width: 100%;
+      button.btn {
+        width: 50%;
+      }
+    }
+    div.panel-body {
+      height: 100%;
+    }
+  }
+}
+
+textarea.form-control {
+  margin-top: 10px;
+  // another disgusting hack, needs to be changed if row height changed
+  height: 70%;
+  .scrollable-content;
+}

@@ -9,6 +9,7 @@ CJSX_CC = $(NPM_BIN)/cjsx
 LESS_CC = $(NPM_BIN)/lessc
 UGLIFY_JS = $(NPM_BIN)/uglifyjs
 BROWSERIFY = $(NPM_BIN)/browserify
+CLEAN_CSS = $(NPM_BIN)/cleancss
 
 UGLIFY_JS_OPTS := -mc --screw-ie8
 
@@ -19,7 +20,8 @@ EXTERN_JS := $(REACT_JS)
 EXTERN_JS_PROOFS := $(patsubst %,$(NODE_DIR)/%,$(EXTERN_JS))
 
 # make deps
-DEPS := $(CJSX_CC) $(LESS_CC) $(UGLIFY_JS) $(BROWSERIFY) $(EXTERN_JS_PROOFS)
+DEPS := $(CJSX_CC) $(LESS_CC) $(UGLIFY_JS) $(BROWSERIFY) $(CLEAN_CSS) \
+	$(EXTERN_JS_PROOFS)
 
 # input/output files
 SRC_DIR := src
@@ -44,19 +46,19 @@ TARGETS := $(JS_FINAL) $(CSS_OUT) $(BROWSERIFY_EXTERN_BUNDLE)
 
 all: $(TARGETS)
 
-$(JS_FINAL): $(JS_OUT) $(DEPS)
+$(JS_FINAL): $(JS_OUT) $(BROWSERIFY) $(UGLIFY_JS)
 	$(BROWSERIFY) $(BROWSERIFY_EXTERN_NOREQ) $(JS_OUT) | \
 		$(UGLIFY_JS) $(UGLIFY_JS_OPTS) -o $@
 
-$(BROWSERIFY_EXTERN_BUNDLE): $(DEPS)
+$(BROWSERIFY_EXTERN_BUNDLE): $(BROWSERIFY) $(EXTERN_JS_PROOFS) $(UGLIFY_JS)
 	$(BROWSERIFY) $(BROWSERIFY_EXTERN_REQUIRE) | \
 		$(UGLIFY_JS) $(UGLIFY_JS_OPTS) -o $@
 
-%.js: %.cjsx $(CJSX_CC) $(DEPS)
+%.js: %.cjsx $(CJSX_CC)
 	$(CJSX_CC) -bc --no-header $<
 
-%.css: %.less $(LESS_CC) $(DEPS)
-	$(LESS_CC) -x --clean-css $< > $@
+%.css: %.less $(LESS_CC) $(CLEAN_CSS)
+	$(LESS_CC) $< | $(CLEAN_CSS) -o $@
 
 clean:
 	rm -f $(TARGETS)

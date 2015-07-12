@@ -8,10 +8,101 @@
 <head>
   <link rel="stylesheet" href="../res/bootstrap/css/bootstrap.min.css" />
   <link rel="stylesheet" href="../res/bootstrap/css/bootstrap-theme.min.css" />
+  <link rel="stylesheet" href="styles/site.css" />
 </head>
 
 <body>
-  <div id="root"></div>
+  <div id="root" class="container-fluid">
+    <div class="row">
+      <div class="col-md-2">
+        <label for="search-species">species search</label>
+        <div class="display-item tall-object" id="search-species">
+          <div class="input-group">
+            <input type="text" class="form-control" placeholder="Search for..."></input>
+            <span class="input-group-btn">
+              <button class="btn btn-default" type="button">Go!</button>
+            </span>
+          </div>
+          <div class="list-group">
+            <a href="#" class="list-group-item">Dapibus ac facilisis in</a>
+            <a href="#" class="list-group-item">Morbi leo risus</a>
+            <a href="#" class="list-group-item">Porta ac consectetur ac</a>
+            <a href="#" class="list-group-item">Vestibulum at eros</a>
+            <a href="#" class="list-group-item">Dapibus ac facilisis in</a>
+            <a href="#" class="list-group-item">Dapibus ac facilisis in</a>
+            <a href="#" class="list-group-item">Dapibus ac facilisis in</a>
+            <a href="#" class="list-group-item">Dapibus ac facilisis in</a>
+            <a href="#" class="list-group-item">Dapibus ac facilisis in</a>
+            <a href="#" class="list-group-item">Dapibus ac facilisis in</a>
+            <a href="#" class="list-group-item">Dapibus ac facilisis in</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-5">
+        <label for="input-panel">input panel</label>
+        <div class="display-item tall-object" id="input-panel">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <div class="row">
+                <div class="col-sm-9">
+                  <p>input directions lol</p>
+                </div>
+                <div class="col-sm-3">
+                  <div class="btn-group pull-right">
+                    <button type="button" class="btn btn-primary">a</button>
+                    <button type="button" class="btn btn-default">b</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="panel-body">
+              <textarea class="form-control"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-5">
+        <label for="output-panel">output panel</label>
+        <div class="display-item tall-object" id="output-panel">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <p>output directions lol</p>
+            </div>
+            <div class="panel-body">
+              <textarea class="form-control"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-2">
+        <label for="advanced-buttons">advanced choices</label>
+        <div class="display-item short-object" id="advanced-buttons"
+             style="display: flex; flex-wrap: wrap;">
+          <div class="option-explanation" style="flex-grow: 1;">
+            <button type="button" class="btn btn-primary">a</button>
+            <p>text</p>
+          </div>
+          <div class="option-explanation" style="flex-grow: 1;">
+            <button type="button" class="btn btn-default">b</button>
+            <p>text2</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-10">
+        <label for="output-choices">output options</label>
+        <div class="display-item short-object" id="output-choices">
+          <button type="button" class="btn btn-primary">a</button>
+          <button type="button" class="btn btn-default">b</button>
+          <button type="button" class="btn btn-primary">a</button>
+          <button type="button" class="btn btn-primary">a</button>
+          <button type="button" class="btn btn-primary">a</button>
+          <button type="button" class="btn btn-primary">a</button>
+        </div>
+      </div>
+    </div>
+  </div>
   <script src="scripts/vendor.js"></script>
   <script src="scripts/bundle.js"></script>
 </body>

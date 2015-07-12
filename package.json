@@ -8,6 +8,7 @@
   },
   "devDependencies": {
     "browserify": "^10.2.6",
+    "clean-css": "^3.3.5",
     "coffee-react": "^4.0.0",
     "less": "^2.5.1",
     "react": "^0.13.3",
