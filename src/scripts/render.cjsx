@@ -1,5 +1,4 @@
 React = require 'react'
-
 UI = require './components'
 
 React.render <UI.SearchList classes="display-item tall-object"
@@ -13,3 +12,6 @@ React.render <UI.OutputTextPanel text="output directions"
 React.render <UI.InputTextPanel text="input directions"
   name="input panel" classes="display-item tall-object" />,
   document.getElementById 'input-panel'
+
+React.render <UI.AdvancedOptions />,
+  document.getElementById 'advanced-options'

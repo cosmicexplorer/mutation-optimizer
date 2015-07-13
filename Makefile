@@ -15,9 +15,9 @@ UGLIFY_JS_OPTS := -mc --screw-ie8
 
 # external js
 REACT_JS := react
-EXTERN_JS := $(REACT_JS)
+EXTERN_JS := $(REACT_JS) $(JQUERY)
 
-EXTERN_JS_PROOFS := $(patsubst %,$(NODE_DIR)/%,$(EXTERN_JS))
+EXTERN_JS_PROOFS := $(patsubst %,$(NODE_DIR)/%/README.md,$(EXTERN_JS))
 
 # make deps
 DEPS := $(CJSX_CC) $(LESS_CC) $(UGLIFY_JS) $(BROWSERIFY) $(CLEAN_CSS) \
