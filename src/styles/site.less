@@ -52,6 +52,9 @@ div.display-item {
   div.panel {
     height: 100%;
     margin-bottom: 0;
+    // flex display
+    display: flex;
+    flex-direction: column;
     div.panel-heading {
       display: flex;
       justify-content: space-between;
@@ -60,7 +63,11 @@ div.display-item {
       }
     }
     div.panel-body {
-      height: 100%;
+      flex-grow: 1;
+      textarea {
+        height: 100%;
+        max-height: 100%;
+      }
     }
   }
 }

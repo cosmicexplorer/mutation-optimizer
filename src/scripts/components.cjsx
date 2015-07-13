@@ -26,13 +26,10 @@ SearchBar = React.createClass
     </div>
 
 SearchList = React.createClass
-  getInitialState: ->
-    # TODO: find better way to do this
-    idEl: Math.random()
   render: ->
     <div>
-      <label htmlFor={@state.idEl}>{@props.name}</label>
-      <div className={@props.classes} id={@state.idEl}>
+      <label>{@props.name}</label>
+      <div className={@props.classes}>
         <SearchBar/>
         <ItemList str="a"/>
       </div>
@@ -44,30 +41,47 @@ TextSection = React.createClass
     <textarea className="form-control" readOnly={@props.textReadOnly}>
     </textarea>
 
-TextPanel = React.createClass
-  getInitialState: ->
-    discussionText: @props.text or ""
-    idEl: Math.random()
-  render: ->
-    panelClass = @props.panelClass or 'panel-default'
-    panelClasses = "panel #{panelClass}"
-    <div>
-      <label htmlFor={@state.idEl}>{@props.name}</label>
-      <div className={@props.classes}>
-        <div className={panelClasses} id={@state.idEl}>
-          <div className="panel-heading">
-            <p>{@state.discussionText}</p>
-          </div>
-          <div className="panel-body">
-            <TextSection readOnly={@props.textReadOnly} />
-          </div>
-        </div>
+LabeledPanelFactory = (labelTitle, outerClasses, panelClasses, headerContent,
+  bodyContent) ->
+  <div>
+    <label>{labelTitle}</label>
+    <div className={outerClasses}>
+      <div className={"panel " + panelClasses}>
+        <div className="panel-heading">{headerContent}</div>
+        <div className="panel-body">{bodyContent}</div>
       </div>
     </div>
+  </div>
+
+OutputTextPanel = React.createClass
+  getInitialState: ->
+    discussionText: @props.text or ""
+    panelClass: @props.panelClass or 'panel-default'
+  render: ->
+    LabeledPanelFactory @props.name, @props.classes, @state.panelClass,
+      <p>{@state.discussionText}</p>,
+      <TextSection textReadOnly=true />
+
+InputTextPanel = React.createClass
+  getInitialState: ->
+    discussionText: @props.text or ""
+    panelClass: @props.panelClass or 'panel-default'
+  render: ->
+    LabeledPanelFactory @props.name, @props.classes, @state.panelClass,
+      [
+        <p key="1">{@state.discussionText}</p>
+        <div key="2" className="btn-group">
+          <button htmlType="button" className="btn btn-primary">a</button>
+          <button htmlType="button" className="btn btn-default">b</button>
+        </div>
+      ],
+      <TextSection textReadOnly=false />
 
 module.exports =
   ItemList: ItemList
   SearchBar: SearchBar
   SearchList: SearchList
   TextSection: TextSection
-  TextPanel: TextPanel
+  LabeledPanelFactory: LabeledPanelFactory
+  OutputTextPanel: OutputTextPanel
+  InputTextPanel: InputTextPanel
