@@ -70,6 +70,7 @@ ButtonNonSelected = 'btn btn-default'
 makeButtonClass = (ind1, ind2) ->
   if ind1 is ind2 then ButtonSelected else ButtonNonSelected
 
+### just a buncha buttons ###
 ButtonArray = React.createClass
   getInitialState: ->
     selectedIndex: @props.initialIndex or 0
@@ -102,6 +103,7 @@ InputTextPanel = React.createClass
       <TextSection textReadOnly=false />
     </LabeledPanel>
 
+### option elements ###
 CheckboxOption = React.createClass
   render: ->
     <div className="option-box">

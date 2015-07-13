@@ -1,3 +1,19 @@
+@generic-foreground-color: #fff;
+@generic-background-color: #f2f2f2;
+// @generic-background-color: #F2F2F2;
+
+// none repeat scroll 0% 0%
+
+html, body {
+  background-color: @generic-background-color;
+  color: @generic-foreground-color;
+}
+
+@generic-dark-color: #333;
+label, p {
+  color: @generic-dark-color;
+}
+
 .container-fluid {
   padding-top: 15px;
 }
@@ -20,10 +36,10 @@
 @big-button-width: 80px;
 div.display-item {
   // generic display
-  margin-bottom: 20px;
-  margin-right: 10px;
+  margin-bottom: 30px;
+  margin-right: 5px;
   border-radius: @standard-border-radius;
-  box-shadow: 10px 10px 28px 2px rgba(0, 0, 0, 0.75);
+  box-shadow: 10px 10px 10px -11px rgba(0,0,0,0.75);
   // inner arrangement
   display: flex;
   flex-direction: column;
