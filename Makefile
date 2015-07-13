@@ -24,7 +24,8 @@ DEPS := $(CJSX_CC) $(LESS_CC) $(UGLIFY_JS) $(BROWSERIFY) $(CLEAN_CSS) \
 	$(EXTERN_JS_PROOFS)
 
 # input/output files
-SRC_DIR := src
+# github pages sucks
+SRC_DIR := .
 SCRIPTS_DIR := $(SRC_DIR)/scripts
 STYLES_DIR := $(SRC_DIR)/styles
 
