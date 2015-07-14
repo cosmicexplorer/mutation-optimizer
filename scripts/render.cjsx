@@ -13,7 +13,8 @@ React.render <UI.InputTextPanel text="input directions"
   name="input panel" classes="display-item tall-object" />,
   document.getElementById 'input-panel'
 
-React.render <UI.AdvancedOptions labelText="advanced options">
+React.render <UI.AdvancedOptions labelText="advanced options"
+  labelClasses="lower-level">
     <UI.CheckboxWithContext heading="hey" fn={-> console.log "ya"}>
       <p>explanation</p>
     </UI.CheckboxWithContext>
@@ -23,14 +24,15 @@ React.render <UI.AdvancedOptions labelText="advanced options">
   </UI.AdvancedOptions>,
   document.getElementById 'advanced-options'
 
-React.render <UI.DisableableItem fn={-> console.log "mucho"} labelText="ee">
+React.render <UI.DisableableItem heading="aa" fn={-> console.log "mucho"}
+  labelText="ee" labelClasses="lower-level">
     <UI.OptionsBox>
-      <UI.ParameterizedOption text="lol"></UI.ParameterizedOption>
-      <UI.ParameterizedOption text="lol"></UI.ParameterizedOption>
-      <UI.ParameterizedOption text="lol"></UI.ParameterizedOption>
-      <UI.ParameterizedOption text="lol"></UI.ParameterizedOption>
-      <UI.ParameterizedOption text="lol"></UI.ParameterizedOption>
-      <UI.ParameterizedOption text="lol"></UI.ParameterizedOption>
+      <UI.ParameterizedOption text="lol" isDisabled=false />
+      <UI.ParameterizedOption text="lol" isDisabled=false />
+      <UI.ParameterizedOption text="lol" isDisabled=false />
+      <UI.ParameterizedOption text="lol" isDisabled=false />
+      <UI.ParameterizedOption text="lol" isDisabled=false />
+      <UI.ParameterizedOption text="lol" isDisabled=false />
     </UI.OptionsBox>
   </UI.DisableableItem>,
   document.getElementById 'output-options'

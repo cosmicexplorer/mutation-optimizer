@@ -1,6 +1,9 @@
 .PHONY: all clean distclean
 .DELETE_ON_ERROR:
 
+# TODO: move bootstrap and font-awesome to npm packages and reference those
+# instead of copying them into the repo
+
 NODE_DIR := node_modules
 
 # node binaries

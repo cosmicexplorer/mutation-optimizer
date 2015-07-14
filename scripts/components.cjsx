@@ -112,11 +112,14 @@ InputTextPanel = React.createClass
 
 ### option elements ###
 CheckboxOption = React.createClass
+  getInitialState: ->
+    id: gensym()
+  onChangeFn: (ev) ->
+    @props.fn document.getElementById(@state.id).checked
   render: ->
-    id = gensym()
     <div className="option-switch">
-      <input type="checkbox" onChange={@props.fn} id={id}></input>
-      <label htmlFor={id}>{@props.heading}</label>
+      <input type="checkbox" onChange={@onChangeFn} id={@state.id}></input>
+      <label htmlFor={@state.id}>{@props.heading}</label>
     </div>
 
 CheckboxWithContext = React.createClass
@@ -129,7 +132,7 @@ CheckboxWithContext = React.createClass
 AdvancedOptions = React.createClass
   render: ->
     <div>
-      <label>{@props.labelText}</label>
+      <label className={@props.labelClasses or ""}>{@props.labelText}</label>
       <div className='option-pane short-object'>
         {@props.children}
       </div>
@@ -138,29 +141,50 @@ AdvancedOptions = React.createClass
 
 ### parameterized options ###
 OptionsBox = React.createClass
+  getInitialState: ->
+    disabled: @props.isDisabled
   render: ->
-    <div className="options-box">{@props.children}</div>
+    console.log @props
+    console.log @state
+    <div className="options-box">
+      {
+        React.Children.map @props.children, (child) =>
+          React.cloneElement child, isDisabled: @state.disabled
+      }
+    </div>
 
-NumericPlaceholder = "00.00"
+NumericPlaceholder = "0.0"
+makeInputAddon = (el) ->
+  <span className="input-group-addon">{el}</span> if el
 ParameterizedOption = React.createClass
+  getInitialState: ->
+    disabled: @props.isDisabled
   render: ->
     <div className="parameterized-option">
       <label>{@props.text}</label>
       <div className="input-group input-group-sm">
-        {if @props.children?[0]
-           <span className="input-group-addon">{@props.children[0]}</span>}
-        <input type={@props.inputType or "text"} className="form-control"
-          placeholder={@props.initialInput or NumericPlaceholder}></input>
-        {if @props.children?[1]
-           <span className="input-group-addon">{@props.children[1]}</span>}
+        {makeInputAddon @props.children?[0]}
+        <input type={@props.inputType or "text"} className="form-control num"
+          placeholder={@props.initialInput or NumericPlaceholder}
+          disabled={@state.disabled}></input>
+        {makeInputAddon @props.children?[0]}
       </div>
     </div>
 
 DisableableItem = React.createClass
+  getInitialState: ->
+    disabled: false
+  onCheckBox: (unchecked) ->
+    @setState disabled: unchecked
   render: ->
-    <AdvancedOptions labelText={@props.labelText}>
-      <CheckboxWithContext heading="aa" fn={@props.fn}>
-        {@props.children}
+    <AdvancedOptions labelText={@props.labelText}
+      labelClasses={@props.labelClasses}>
+      <CheckboxWithContext heading={@props.heading} fn={@onCheckBox}>
+        {
+          console.log @state.disabled
+          React.Children.map @props.children, (child) =>
+            React.cloneElement child, isDisabled: @state.disabled
+        }
       </CheckboxWithContext>
     </AdvancedOptions>
 
