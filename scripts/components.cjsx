@@ -1,5 +1,7 @@
 React = require 'react'
+gensym = require './gensym'
 
+
 ### searchable list ###
 ItemList = React.createClass
   getInitialState: ->
@@ -21,7 +23,9 @@ SearchBar = React.createClass
       <input type="text" className="form-control" placeholder="Search for...">
       </input>
       <span className="input-group-btn">
-        <button className="btn btn-default" type="button">Go!</button>
+        <button className="btn btn-default" type="button">
+          <span className="glyphicon glyphicon-search"></span>
+        </button>
       </span>
     </div>
 
@@ -35,6 +39,7 @@ SearchList = React.createClass
       </div>
     </div>
 
+
 ### text panel ###
 TextSection = React.createClass
   render: ->
@@ -64,13 +69,14 @@ OutputTextPanel = React.createClass
       <TextSection textReadOnly=true />
     </LabeledPanel>
 
+
+### just a buncha buttons ###
 ButtonSelected = 'btn btn-primary'
 ButtonNonSelected = 'btn btn-default'
 
 makeButtonClass = (ind1, ind2) ->
   if ind1 is ind2 then ButtonSelected else ButtonNonSelected
 
-### just a buncha buttons ###
 ButtonArray = React.createClass
   getInitialState: ->
     selectedIndex: @props.initialIndex or 0
@@ -103,28 +109,62 @@ InputTextPanel = React.createClass
       <TextSection textReadOnly=false />
     </LabeledPanel>
 
+
 ### option elements ###
 CheckboxOption = React.createClass
   render: ->
-    <div className="option-box">
-      <div className="option-switch">
-        <input type="checkbox" onChange={@props.fn}></input>
-      </div>
-      <p>{@props.text}</p>
+    id = gensym()
+    <div className="option-switch">
+      <input type="checkbox" onChange={@props.fn} id={id}></input>
+      <label htmlFor={id}>{@props.heading}</label>
     </div>
 
-OptionPaneFactory = (classes, panelItems) ->
-  <div className={"display-item " + classes}>
-    {panelItems}
-  </div>
+CheckboxWithContext = React.createClass
+  render: ->
+    <div className={"display-item option-box " + (@props.classes or "")}>
+      <CheckboxOption fn={@props.fn} heading={@props.heading} />
+      {@props.children}
+    </div>
 
 AdvancedOptions = React.createClass
   render: ->
-    <div className='display-item option-pane short-object'>
-      <CheckboxOption text="hey" fn={-> console.log "ya"} />
-      <CheckboxOption text="lol" fn={-> console.log "yar"} />
+    <div>
+      <label>{@props.labelText}</label>
+      <div className='option-pane short-object'>
+        {@props.children}
+      </div>
     </div>
 
+
+### parameterized options ###
+OptionsBox = React.createClass
+  render: ->
+    <div className="options-box">{@props.children}</div>
+
+NumericPlaceholder = "00.00"
+ParameterizedOption = React.createClass
+  render: ->
+    <div className="parameterized-option">
+      <label>{@props.text}</label>
+      <div className="input-group input-group-sm">
+        {if @props.children?[0]
+           <span className="input-group-addon">{@props.children[0]}</span>}
+        <input type={@props.inputType or "text"} className="form-control"
+          placeholder={@props.initialInput or NumericPlaceholder}></input>
+        {if @props.children?[1]
+           <span className="input-group-addon">{@props.children[1]}</span>}
+      </div>
+    </div>
+
+DisableableItem = React.createClass
+  render: ->
+    <AdvancedOptions labelText={@props.labelText}>
+      <CheckboxWithContext heading="aa" fn={@props.fn}>
+        {@props.children}
+      </CheckboxWithContext>
+    </AdvancedOptions>
+
+
 module.exports =
   ItemList: ItemList
   SearchBar: SearchBar
@@ -133,4 +173,8 @@ module.exports =
   OutputTextPanel: OutputTextPanel
   InputTextPanel: InputTextPanel
   CheckboxOption: CheckboxOption
+  CheckboxWithContext: CheckboxWithContext
   AdvancedOptions: AdvancedOptions
+  OptionsBox: OptionsBox
+  ParameterizedOption: ParameterizedOption
+  DisableableItem: DisableableItem

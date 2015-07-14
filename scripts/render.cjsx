@@ -13,5 +13,24 @@ React.render <UI.InputTextPanel text="input directions"
   name="input panel" classes="display-item tall-object" />,
   document.getElementById 'input-panel'
 
-React.render <UI.AdvancedOptions />,
+React.render <UI.AdvancedOptions labelText="advanced options">
+    <UI.CheckboxWithContext heading="hey" fn={-> console.log "ya"}>
+      <p>explanation</p>
+    </UI.CheckboxWithContext>
+    <UI.CheckboxWithContext heading="lol" fn={-> console.log "yar"}>
+      <p>EXPLAIN</p>
+    </UI.CheckboxWithContext>
+  </UI.AdvancedOptions>,
   document.getElementById 'advanced-options'
+
+React.render <UI.DisableableItem fn={-> console.log "mucho"} labelText="ee">
+    <UI.OptionsBox>
+      <UI.ParameterizedOption text="lol"></UI.ParameterizedOption>
+      <UI.ParameterizedOption text="lol"></UI.ParameterizedOption>
+      <UI.ParameterizedOption text="lol"></UI.ParameterizedOption>
+      <UI.ParameterizedOption text="lol"></UI.ParameterizedOption>
+      <UI.ParameterizedOption text="lol"></UI.ParameterizedOption>
+      <UI.ParameterizedOption text="lol"></UI.ParameterizedOption>
+    </UI.OptionsBox>
+  </UI.DisableableItem>,
+  document.getElementById 'output-options'

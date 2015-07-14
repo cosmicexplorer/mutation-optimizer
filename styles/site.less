@@ -1,16 +1,16 @@
 @generic-foreground-color: #fff;
 @generic-background-color: #f2f2f2;
 // @generic-background-color: #F2F2F2;
-
 // none repeat scroll 0% 0%
-
-html, body {
+html,
+body {
   background-color: @generic-background-color;
   color: @generic-foreground-color;
 }
 
 @generic-dark-color: #333;
-label, p {
+label,
+p {
   color: @generic-dark-color;
 }
 
@@ -27,19 +27,20 @@ label, p {
   height: @main-row-height;
 }
 
-@short-row-height: 100px;
+@short-row-height: 120px;
 .short-object {
   height: @short-row-height;
 }
 
 @standard-border-radius: 5px;
 @big-button-width: 80px;
-div.display-item {
+@standard-box-shadow: 10px 10px 10px -7px rgba(0, 0, 0, 0.75);
+.display-item {
   // generic display
-  margin-bottom: 30px;
+  margin-bottom: 15px;
   margin-right: 5px;
   border-radius: @standard-border-radius;
-  box-shadow: 10px 10px 10px -11px rgba(0,0,0,0.75);
+  box-shadow: @standard-box-shadow;
   // inner arrangement
   display: flex;
   flex-direction: column;
@@ -54,7 +55,7 @@ div.display-item {
     .scrollable-content;
     margin-bottom: 4px;
   }
-  div.input-group {
+  .input-group {
     // make the corners line up
     input {
       border-bottom: 1px solid #555;
@@ -65,20 +66,20 @@ div.display-item {
     }
   }
   // panel display
-  div.panel {
+  .panel {
     height: 100%;
     margin-bottom: 0;
     // flex display
     display: flex;
     flex-direction: column;
-    div.panel-heading {
+    .panel-heading {
       display: flex;
       justify-content: space-between;
-      div.btn-group button {
+      .btn-group button {
         width: @big-button-width;
       }
     }
-    div.panel-body {
+    .panel-body {
       flex-grow: 1;
       textarea {
         height: 100%;
@@ -87,25 +88,58 @@ div.display-item {
   }
 }
 
-.option-box {
-  display: flex;
-  flex-direction: column;
-  .option-with-name {
-    flex-grow: 0;
-  }
-  >:not(.option-with-name) {
-    flex-grow: 1;
-  }
-}
-
-.display-item.option-pane {
+@top-button-gradient: white;
+@bottom-button-gradient: rgba(226, 226, 226, .3);
+.option-pane {
+  background-color: transparent;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+  border-radius: @standard-border-radius;
   .option-box {
-    flex-shrink: 1;
-    .option-switch {
-      float: right;
+    height: 100%;
+    border: 1px solid #d7dada;
+    border-radius: @standard-border-radius;
+    padding: 10px 10px 10px 10px;
+    background-image: linear-gradient(
+      to bottom, @top-button-gradient, @bottom-button-gradient);
+    // flex props
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+input[type=checkbox] {
+  display: none;
+}
+input[type=checkbox] + label:before {
+  font-family: FontAwesome;
+  display: inline-block;
+}
+// letter-spacing is because the check mark moves around
+input[type=checkbox] + label:before {
+  letter-spacing: 10px;
+  content: "\f096";
+}
+input[type=checkbox]:checked + label:before {
+  letter-spacing: 8px;
+  content: "\f046";
+}
+
+@small-padding-distance: 20px;
+@thin-border: 1px solid #CCC;
+.options-box {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+  padding-right: @small-padding-distance;
+  padding-left: @small-padding-distance;
+  .parameterized-option {
+    .input-group {
+      input {
+        border-bottom: @thin-border;
+      }
     }
   }
 }
@@ -113,4 +147,12 @@ div.display-item {
 textarea {
   .scrollable-content;
   resize: none;
+}
+
+@panel-color: #f5f5f5;
+// remove bootstrap's default styling, gradients look tacky
+.panel .panel-heading,
+button.btn.btn-default {
+  background-image: none;
+  background-color: @panel-color;
 }

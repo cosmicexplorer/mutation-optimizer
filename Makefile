@@ -6,6 +6,7 @@ NODE_DIR := node_modules
 # node binaries
 NPM_BIN = $(shell npm bin)
 CJSX_CC = $(NPM_BIN)/cjsx
+COFFEE_CC = $(NPM_BIN)/coffee
 LESS_CC = $(NPM_BIN)/lessc
 UGLIFY_JS = $(NPM_BIN)/uglifyjs
 BROWSERIFY = $(NPM_BIN)/browserify
@@ -21,7 +22,7 @@ EXTERN_JS_PROOFS := $(patsubst %,$(NODE_DIR)/%/README.md,$(EXTERN_JS))
 
 # make deps
 DEPS := $(CJSX_CC) $(LESS_CC) $(UGLIFY_JS) $(BROWSERIFY) $(CLEAN_CSS) \
-	$(EXTERN_JS_PROOFS)
+	$(COFFEE_CC) $(EXTERN_JS_PROOFS)
 
 # input/output files
 # github pages sucks
@@ -30,8 +31,10 @@ SCRIPTS_DIR := $(SRC_DIR)/scripts
 STYLES_DIR := $(SRC_DIR)/styles
 
 CJSX_IN := $(wildcard $(SCRIPTS_DIR)/*.cjsx)
-JS_OUT := $(patsubst %.cjsx,%.js,$(CJSX_IN))
-.INTERMEDIATE: $(JS_OUT) # this shouldn't be necessary, but whatever
+COFFEE_IN := $(wildcard $(SCRIPTS_DIR)/*.coffee)
+COFFEE_OPTS := -bc --no-header
+JS_OUT := $(patsubst %.cjsx,%.js,$(CJSX_IN)) \
+	$(patsubst %.coffee,%.js,$(COFFEE_IN))
 JS_FINAL := $(SCRIPTS_DIR)/bundle.js
 
 LESS_IN := $(wildcard $(STYLES_DIR)/*.less)
@@ -55,14 +58,17 @@ $(BROWSERIFY_EXTERN_BUNDLE): $(BROWSERIFY) $(EXTERN_JS_PROOFS) $(UGLIFY_JS)
 	$(BROWSERIFY) $(BROWSERIFY_EXTERN_REQUIRE) | \
 		$(UGLIFY_JS) $(UGLIFY_JS_OPTS) -o $@
 
+%.js: %.coffee $(COFFEE_CC)
+	$(COFFEE_CC) $(COFFEE_OPTS) $<
+
 %.js: %.cjsx $(CJSX_CC)
-	$(CJSX_CC) -bc --no-header $<
+	$(CJSX_CC) $(COFFEE_OPTS) $<
 
 %.css: %.less $(LESS_CC) $(CLEAN_CSS)
 	$(LESS_CC) $< | $(CLEAN_CSS) -o $@
 
 clean:
-	rm -f $(TARGETS)
+	rm -f $(TARGETS) $(JS_OUT)
 
 $(DEPS):
 	npm install
