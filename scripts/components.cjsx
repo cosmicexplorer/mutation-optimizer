@@ -142,14 +142,12 @@ AdvancedOptions = React.createClass
 ### parameterized options ###
 OptionsBox = React.createClass
   getInitialState: ->
-    disabled: @props.isDisabled
+    disabled: @props.disabled
   render: ->
-    console.log @props
-    console.log @state
     <div className="options-box">
       {
         React.Children.map @props.children, (child) =>
-          React.cloneElement child, isDisabled: @state.disabled
+          React.cloneElement child, disabled: @props.disabled
       }
     </div>
 
@@ -157,8 +155,6 @@ NumericPlaceholder = "0.0"
 makeInputAddon = (el) ->
   <span className="input-group-addon">{el}</span> if el
 ParameterizedOption = React.createClass
-  getInitialState: ->
-    disabled: @props.isDisabled
   render: ->
     <div className="parameterized-option">
       <label>{@props.text}</label>
@@ -166,7 +162,7 @@ ParameterizedOption = React.createClass
         {makeInputAddon @props.children?[0]}
         <input type={@props.inputType or "text"} className="form-control num"
           placeholder={@props.initialInput or NumericPlaceholder}
-          disabled={@state.disabled}></input>
+          disabled={@props.disabled}></input>
         {makeInputAddon @props.children?[0]}
       </div>
     </div>
@@ -180,9 +176,8 @@ DisableableItem = React.createClass
     <AdvancedOptions labelText={@props.labelText}>
       <CheckboxWithContext heading={@props.heading} fn={@onCheckBox}>
         {
-          console.log @state.disabled
           React.Children.map @props.children, (child) =>
-            React.cloneElement child, isDisabled: @state.disabled
+            React.cloneElement child, disabled: @state.disabled
         }
       </CheckboxWithContext>
     </AdvancedOptions>
