@@ -13,8 +13,7 @@ React.render <UI.InputTextPanel text="input directions"
   name="input panel" classes="display-item tall-object" />,
   document.getElementById 'input-panel'
 
-React.render <UI.AdvancedOptions labelText="advanced options"
-  labelClasses="lower-level">
+React.render <UI.AdvancedOptions labelText="advanced options">
     <UI.CheckboxWithContext heading="hey" fn={-> console.log "ya"}>
       <p>explanation</p>
     </UI.CheckboxWithContext>
@@ -25,7 +24,7 @@ React.render <UI.AdvancedOptions labelText="advanced options"
   document.getElementById 'advanced-options'
 
 React.render <UI.DisableableItem heading="aa" fn={-> console.log "mucho"}
-  labelText="ee" labelClasses="lower-level">
+  labelText="ee">
     <UI.OptionsBox>
       <UI.ParameterizedOption text="lol" isDisabled=false />
       <UI.ParameterizedOption text="lol" isDisabled=false />

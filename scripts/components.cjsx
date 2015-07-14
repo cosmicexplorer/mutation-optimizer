@@ -32,7 +32,7 @@ SearchBar = React.createClass
 SearchList = React.createClass
   render: ->
     <div>
-      <label>{@props.name}</label>
+      <label className="spaced">{@props.name}</label>
       <div className={@props.classes}>
         <SearchBar/>
         <ItemList str="a"/>
@@ -49,7 +49,7 @@ TextSection = React.createClass
 LabeledPanel = React.createClass
   render: ->
     <div>
-      <label>{@props.labelTitle}</label>
+      <label className="spaced">{@props.labelTitle}</label>
       <div className={@props.outerClasses}>
         <div className="panel panel-default">
           <div className="panel-heading">{@props.headers}</div>
@@ -132,7 +132,7 @@ CheckboxWithContext = React.createClass
 AdvancedOptions = React.createClass
   render: ->
     <div>
-      <label className={@props.labelClasses or ""}>{@props.labelText}</label>
+      <label className="spaced">{@props.labelText}</label>
       <div className='option-pane short-object'>
         {@props.children}
       </div>
@@ -177,8 +177,7 @@ DisableableItem = React.createClass
   onCheckBox: (unchecked) ->
     @setState disabled: unchecked
   render: ->
-    <AdvancedOptions labelText={@props.labelText}
-      labelClasses={@props.labelClasses}>
+    <AdvancedOptions labelText={@props.labelText}>
       <CheckboxWithContext heading={@props.heading} fn={@onCheckBox}>
         {
           console.log @state.disabled
