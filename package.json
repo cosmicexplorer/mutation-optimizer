@@ -7,10 +7,12 @@
     "url": "git://github.com/cosmicexplorer/mutation-optimizer.git"
   },
   "devDependencies": {
+    "bootstrap": "^3.3.5",
     "browserify": "^10.2.6",
     "clean-css": "^3.3.5",
     "coffee-react": "^4.0.0",
     "coffee-script": "^1.9.3",
+    "font-awesome": "^4.3.0",
     "less": "^2.5.1",
     "react": "^0.13.3",
     "uglify-js": "^2.4.23"

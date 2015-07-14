@@ -1,9 +1,6 @@
 .PHONY: all clean distclean
 .DELETE_ON_ERROR:
 
-# TODO: move bootstrap and font-awesome to npm packages and reference those
-# instead of copying them into the repo
-
 NODE_DIR := node_modules
 
 # node binaries
@@ -21,7 +18,12 @@ UGLIFY_JS_OPTS := -mc --screw-ie8
 REACT_JS := react
 EXTERN_JS := $(REACT_JS) $(JQUERY)
 
+BOOTSTRAP := bootstrap
+FONT_AWESOME := font-awesome
+EXTERN_CSS := $(BOOTSTRAP) $(FONT_AWESOME)
+
 EXTERN_JS_PROOFS := $(patsubst %,$(NODE_DIR)/%/README.md,$(EXTERN_JS))
+EXTERN_CSS_PROOFS := $(patsubst %,$(NODE_DIR)/%/README.md,$(EXTERN_CSS))
 
 # make deps
 DEPS := $(CJSX_CC) $(LESS_CC) $(UGLIFY_JS) $(BROWSERIFY) $(CLEAN_CSS) \
