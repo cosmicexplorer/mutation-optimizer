@@ -1,5 +1,6 @@
 React = require 'react'
 gensym = require './gensym'
+S = require './strings'
 
 
 ### searchable list ###
@@ -29,29 +30,12 @@ transformInputText = (text) ->
 SearchList = React.createClass
   getInitialState: ->
     inputText: ''
-    selectedElement: null
   clearAndFocusInput: ->
     inp = React.findDOMNode(@refs.textInput)
     inp.value = ''
     inp.focus()
-    @setState
-      selectedElement: null
-      inputText: ''
-    @props.fn
-      key: @props.listKey
-      value: null
-  componentWillUpdate: (props, state) ->
-    el = state.selectedElement
-    navbarItem = document.getElementById 'speciesSelected'
-    if el
-      navbarItem.innerHTML = el
-      navbarItem.className += ' active-element'
-      navbarItem.style.color = stringToColor el
-    else
-      navbarItem.innerHTML = "No species selected."
-      navbarItem.style.color = '#777'
-      navbarItem.className = navbarItem.className.replace /\bactive-element\b/,
-        ""
+    @setState inputText: ''
+    @props.fn null
   render: ->
     <div>
       <label className="spaced">{@props.name}</label>
@@ -61,7 +45,6 @@ SearchList = React.createClass
             placeholder={@props.defaultInput} value={@state.inputText}
             ref="textInput" onChange={=>
               val = React.findDOMNode(@refs.textInput).value
-              console.log val
               @setState inputText: val}>
           </input>
           <span className="input-group-btn">
@@ -73,13 +56,9 @@ SearchList = React.createClass
         </div>
         <ItemList items={@props.items.filter (el) =>
           el.match new RegExp transformInputText(@state.inputText), 'i'}
-          selectFn={(obj) =>
-            @setState
-              selectedElement: obj
-              inputText: obj
-            @props.fn
-              key: @props.listKey
-              value: obj} />
+          selectFn={(selectedElement) =>
+            @setState inputText: selectedElement
+            @props.fn selectedElement} />
       </div>
     </div>
 
@@ -122,50 +101,34 @@ OutputTextPanel = React.createClass
 
 
 ### just a buncha buttons ###
-ButtonSelected = 'btn btn-primary'
-ButtonNonSelected = 'btn btn-default'
+ButtonGroupBase = 'btn '
+ButtonSelected = ButtonGroupBase + 'btn-primary'
+ButtonNonSelected = ButtonGroupBase + 'btn-default'
 
 makeButtonClass = (ind1, ind2) ->
   if ind1 is ind2 then ButtonSelected else ButtonNonSelected
 
 ButtonArray = React.createClass
-  getInitialState: ->
-    selectedIndex: @props.initialIndex or 0
-  makeOnClick: (index) ->
-    =>
-      @setState selectedIndex: index
-      @props.onClickFn? index
   render: ->
     <div className='btn-group'>
-      {<button type='button' key={index}
-               className={makeButtonClass @state.selectedIndex, index}
-               onClick={@makeOnClick index}>
-         {text.heading}
-       </button> for text, index in @props.texts}
+      {<button type='button' key={key}
+               className={makeButtonClass @props.selectedButton, key}
+               onClick={((k) => => @props.onClickFn k)(key)}>
+         {key}
+       </button> for key, val of @props.texts}
     </div>
 
 InputTextPanel = React.createClass
-  getInitialState: ->
-    buttonIndex: 0
-    inputText: ''
   render: ->
     headers = [
-        <p key="1">{@props.children[@state.buttonIndex].text}</p>
-        <ButtonArray key="2" texts={@props.children}
-          initialIndex={@state.buttonIndex}
-          onClickFn={(ind) =>
-            @setState buttonIndex: ind
-            @props.fn
-              key: @props.buttonKey
-              value: @props.children[ind].heading} />
+        <p key="1">{@props.buttons[@props.selectedButton]}</p>
+        <ButtonArray key="2" texts={@props.buttons}
+          selectedButton={@props.selectedButton}
+          onClickFn={@props.typeFn} />
       ]
     <LabeledPanel labelTitle={@props.name} outerClasses={@props.classes}
       headers={headers}>
-      <TextSection textReadOnly=false fn={(txt) =>
-        @setState inputText: txt
-        @props.fn
-          key: @props.sectionKey
-          value: txt} />
+      <TextSection textReadOnly=false fn={@props.inputFn} />
     </LabeledPanel>
 
 
@@ -238,10 +201,9 @@ ParameterizedOption = React.createClass
 DisableableItem = React.createClass
   getInitialState: ->
     disabled: false
-  onCheckBox: (unchecked) ->
-    @setState disabled: unchecked
-    console.log unchecked
-    @props.fn unchecked
+  onCheckBox: (checked) ->
+    @setState disabled: checked
+    @props.fn checked
   render: ->
     <AdvancedOptions labelText={@props.labelText}>
       <CheckboxWithContext heading={@props.heading} fn={@onCheckBox}>
@@ -251,6 +213,100 @@ DisableableItem = React.createClass
         }
       </CheckboxWithContext>
     </AdvancedOptions>
+
+
+### integration ###
+MutationOptimizerApp = React.createClass
+  getInitialState: ->
+    selectedElement: null
+    inputText: ''
+    inputType: S.InitialButtonTitle
+    advancedOptions: JSON.parse JSON.stringify S.AdvancedOptions
+    parameterizedOptions: JSON.parse JSON.stringify S.ParameterizedOptions
+    isDefaultChecked: no
+  render: ->
+    <div>
+      <nav className="navbar navbar-default navbar-static-top">
+        <div className="container-fluid">
+          <div className="navbar-header">
+            <a className="navbar-brand" href="#" target="_blank">
+              mutation-optimizer v0.0
+            </a>
+          </div>
+          {<a href={val} target="_blank"> key={key}
+            <button type="button" className="btn btn-default navbar-btn">
+              {key}
+            </button>
+           </a> for key, val in S.NavbarButtons}
+          <p id="speciesSelected" style={
+            if @state.selectedElement
+              color: stringToColor @state.selectedElement
+            else
+              color: S.DefaultSpeciesColor}
+            className="navbar-text species-selected pull-right">
+              {@state.selectedElement or S.DefaultSpeciesText}
+          </p>
+        </div>
+      </nav>
+      <div className="container-fluid">
+        <div className="row">
+          <div className="col-md-2">
+            <SearchList classes="display-item tall-object listing"
+              name={S.SearchPanelHeading} defaultInput={S.SearchPanelDefault}
+              items={S.SpeciesToSearch}
+              fn={(obj) => @setState selectedElement: obj} />
+          </div>
+          <div className="col-md-5">
+            <InputTextPanel name={S.InputPanelHeading}
+              classes="display-item tall-object"
+              typeFn={(val) => @setState inputType: val}
+              inputFn={(val) => @setState inputText: val}
+              buttons={S.InputButtonTitlesDirections}
+              selectedButton={@state.inputType} />
+          </div>
+          <div className="col-md-5">
+            <OutputTextPanel text={S.OutputDirections}
+              name={S.OutputPanelHeading} classes="display-item tall-object"
+              buttonText={S.OutputButtonText}
+              getOutputFn={=> JSON.stringify @state} />
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-md-2">
+            <AdvancedOptions labelText={S.AdvancedOptionsHeading}>
+            {
+              for key, val of @state.advancedOptions
+                <CheckboxWithContext key={key} heading={key}
+                  fn={((e) => (checked) =>
+                    newOptions = @state.advancedOptions
+                    newOptions[e] = checked
+                    @setState advancedOptions: newOptions)(key)}>
+                  <p className="explanation-text">{S.AdvancedOptions[key]}</p>
+                </CheckboxWithContext>
+            }
+            </AdvancedOptions>
+          </div>
+          <div className="col-md-10">
+            <DisableableItem heading={S.DefaultParamLabel}
+              fn={(checked) => @setState isDefaultChecked: checked}
+              labelText={S.ParameterOptionsHeading}>
+              <OptionsBox>
+                {
+                  for key, val of @state.parameterizedOptions
+                    <ParameterizedOption key={key} text={key}
+                      fn={((e) => (value) =>
+                        newOptions = @state.parameterizedOptions
+                        newOptions[e] = value
+                        @setState parameterizedOptions: newOptions)(key)}
+                      initialInput={val}
+                      isDisabled=false />
+                }
+              </OptionsBox>
+            </DisableableItem>
+          </div>
+        </div>
+      </div>
+    </div>
 
 
 module.exports =
@@ -265,3 +321,4 @@ module.exports =
   OptionsBox: OptionsBox
   ParameterizedOption: ParameterizedOption
   DisableableItem: DisableableItem
+  MutationOptimizerApp: MutationOptimizerApp
