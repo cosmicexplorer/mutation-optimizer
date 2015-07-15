@@ -12,6 +12,14 @@ ItemList = React.createClass
       </a> for el,i in @props.items}
     </div>
 
+stringToColor = (str) ->
+  hash = 0
+  for a in str.split ''
+    hash = a.charCodeAt(0) + ((hash << 7) - hash)
+  color = '#'
+  for i in [0..2]
+    color += ('00' + ((hash << i * 3) & 0xFF).toString(16)).slice(-2)
+  color
 # make fuzzy search regex by inserting wildcards between every letter
 transformInputText = (text) ->
   text.split('').join('.*')
@@ -32,14 +40,21 @@ SearchList = React.createClass
     @props.fn
       key: @props.listKey
       value: null
+  componentWillUpdate: (props, state) ->
+    el = state.selectedElement
+    navbarItem = document.getElementById 'speciesSelected'
+    if el
+      navbarItem.innerHTML = el
+      navbarItem.className += ' active-element'
+      navbarItem.style.color = stringToColor el
+    else
+      navbarItem.innerHTML = "No species selected."
+      navbarItem.style.color = '#777'
+      navbarItem.className = navbarItem.className.replace /\bactive-element\b/,
+        ""
   render: ->
     <div>
       <label className="spaced">{@props.name}</label>
-      {
-        <div className="display-item species-selection pull-right">
-          <p>{@state.selectedElement or "No species selected."}</p>
-        </div>
-      }
       <div className={@props.classes}>
         <div className="input-group">
           <input type="text" className="form-control"
