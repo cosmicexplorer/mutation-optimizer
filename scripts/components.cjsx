@@ -4,48 +4,72 @@ gensym = require './gensym'
 
 ### searchable list ###
 ItemList = React.createClass
-  getInitialState: ->
-    items: [0..10]
-    str: @props.str or "b"
-  addItem: ->
-    items = @state.items
-    @setState items: items.concat items.length
   render: ->
     <div className='list-group'>
-      {<a href='#' onClick={@addItem} className='list-group-item' key={el}>
-        {"#{el}:#{@state.str}"}
-      </a> for el in @state.items}
+      {<a href='#' className='list-group-item' key={i}
+        onClick={((e) => => @props.selectFn e)(el)}>
+        {el}
+      </a> for el,i in @props.items}
     </div>
 
-SearchBar = React.createClass
-  render: ->
-    <div className="input-group">
-      <input type="text" className="form-control" placeholder="Search for...">
-      </input>
-      <span className="input-group-btn">
-        <button className="btn btn-default" type="button">
-          <span className="glyphicon glyphicon-search"></span>
-        </button>
-      </span>
-    </div>
-
+# make fuzzy search regex by inserting wildcards between every letter
+transformInputText = (text) ->
+  text.split('').join('.*')
+# used to have this split into two components, the search bar and the ItemList,
+# and couldn't figure out how to allow the user to input text, but also allow me
+# to input text when changing state. this is less modular, but it works.
 SearchList = React.createClass
+  getInitialState: ->
+    inputText: ''
+    selectedElement: null
+  clearAndFocusInput: ->
+    inp = React.findDOMNode(@refs.textInput)
+    inp.value = ''
+    inp.focus()
+    @setState
+      selectedElement: null
+      inputText: ''
+    @props.fn
+      key: @props.listKey
+      value: null
   render: ->
     <div>
       <label className="spaced">{@props.name}</label>
+      {
+        <div className="display-item species-selection pull-right">
+          <p>{@state.selectedElement or "No species selected."}</p>
+        </div>
+      }
       <div className={@props.classes}>
-        <SearchBar/>
-        <ItemList str="a"/>
+        <div className="input-group">
+          <input type="text" className="form-control"
+            placeholder={@props.defaultInput} value={@state.inputText}
+            ref="textInput" onChange={=>
+              val = React.findDOMNode(@refs.textInput).value
+              console.log val
+              @setState inputText: val}>
+          </input>
+          <span className="input-group-btn">
+            <button className="btn btn-default" type="button"
+              onClick={@clearAndFocusInput}>
+              <span className="glyphicon glyphicon-remove"></span>
+            </button>
+          </span>
+        </div>
+        <ItemList items={@props.items.filter (el) =>
+          el.match new RegExp transformInputText(@state.inputText), 'i'}
+          selectFn={(obj) =>
+            @setState
+              selectedElement: obj
+              inputText: obj
+            @props.fn
+              key: @props.listKey
+              value: obj} />
       </div>
     </div>
 
 
 ### text panel ###
-TextSection = React.createClass
-  render: ->
-    <textarea className="form-control" readOnly={@props.textReadOnly}>
-    </textarea>
-
 LabeledPanel = React.createClass
   render: ->
     <div>
@@ -58,15 +82,27 @@ LabeledPanel = React.createClass
       </div>
     </div>
 
+TextSection = React.createClass
+  render: ->
+    <textarea className="form-control" ref="txtInput"
+      readOnly={@props.textReadOnly} value={@props.text}
+      onChange={=> if @props.fn
+        @props.fn React.findDOMNode(@refs.txtInput).value}></textarea>
+
 OutputTextPanel = React.createClass
   getInitialState: ->
-    discussionText: @props.text or ""
-    panelClass: @props.panelClass or 'panel-default'
+    outputText: ''
   render: ->
-    headers = <p>{@state.discussionText}</p>
+    headers = [
+      <p key="1">{@props.text}</p>
+      <button key="2" type="button" className="btn btn-success"
+        onClick={=> @setState outputText: @props.getOutputFn()}>
+        {@props.buttonText}
+      </button>
+      ]
     <LabeledPanel labelTitle={@props.name} outerClasses={@props.classes}
       headers={headers}>
-      <TextSection textReadOnly=true />
+      <TextSection textReadOnly=true text={@state.outputText} />
     </LabeledPanel>
 
 
@@ -89,37 +125,49 @@ ButtonArray = React.createClass
       {<button type='button' key={index}
                className={makeButtonClass @state.selectedIndex, index}
                onClick={@makeOnClick index}>
-         {text}
+         {text.heading}
        </button> for text, index in @props.texts}
     </div>
 
 InputTextPanel = React.createClass
   getInitialState: ->
-    discussionText: @props.text or ""
-    panelClass: @props.panelClass or 'panel-default'
-    buttonPressed: "left"
+    buttonIndex: 0
+    inputText: ''
   render: ->
     headers = [
-        <p key="1">{@state.discussionText}</p>
-        <ButtonArray key="2" texts={["a","b"]} initialIndex={0}
-          onClickFn={(ind) -> console.log ind} />
+        <p key="1">{@props.children[@state.buttonIndex].text}</p>
+        <ButtonArray key="2" texts={@props.children}
+          initialIndex={@state.buttonIndex}
+          onClickFn={(ind) =>
+            @setState buttonIndex: ind
+            @props.fn
+              key: @props.buttonKey
+              value: @props.children[ind].heading} />
       ]
     <LabeledPanel labelTitle={@props.name} outerClasses={@props.classes}
       headers={headers}>
-      <TextSection textReadOnly=false />
+      <TextSection textReadOnly=false fn={(txt) =>
+        @setState inputText: txt
+        @props.fn
+          key: @props.sectionKey
+          value: txt} />
     </LabeledPanel>
 
 
 ### option elements ###
 CheckboxOption = React.createClass
   getInitialState: ->
+    # id required for proper label placement with font-awesome
     id: gensym()
   onChangeFn: (ev) ->
-    @props.fn document.getElementById(@state.id).checked
+    @props.fn React.findDOMNode(@refs.checkInput).checked
   render: ->
     <div className="option-switch">
-      <input type="checkbox" onChange={@onChangeFn} id={@state.id}></input>
-      <label htmlFor={@state.id}>{@props.heading}</label>
+      <input type="checkbox" onChange={@onChangeFn} ref="checkInput"
+        id={@state.id}></input>
+      <label htmlFor={@state.id} className="checkbox-label">
+        {@props.heading}
+      </label>
     </div>
 
 CheckboxWithContext = React.createClass
@@ -153,17 +201,22 @@ OptionsBox = React.createClass
 
 NumericPlaceholder = "0.0"
 makeInputAddon = (el) ->
-  <span className="input-group-addon">{el}</span> if el
+  <span className="input-group-addon">{el}</span> if el?
+makeLabel = (text, disabled, defaultValue) ->
+  str = text
+  str += " (#{defaultValue})" if disabled
+  <label className="parameter-label">{str}</label>
 ParameterizedOption = React.createClass
   render: ->
     <div className="parameterized-option">
-      <label>{@props.text}</label>
+      {makeLabel @props.text, @props.disabled, @props.initialInput}
       <div className="input-group input-group-sm">
         {makeInputAddon @props.children?[0]}
         <input type={@props.inputType or "text"} className="form-control num"
-          placeholder={@props.initialInput or NumericPlaceholder}
-          disabled={@props.disabled}></input>
-        {makeInputAddon @props.children?[0]}
+          placeholder={@props.initialInput}
+          disabled={@props.disabled}
+          onChange={(ev) => @props.fn(ev.target.value)}></input>
+        {makeInputAddon @props.children?[1]}
       </div>
     </div>
 
@@ -172,6 +225,8 @@ DisableableItem = React.createClass
     disabled: false
   onCheckBox: (unchecked) ->
     @setState disabled: unchecked
+    console.log unchecked
+    @props.fn unchecked
   render: ->
     <AdvancedOptions labelText={@props.labelText}>
       <CheckboxWithContext heading={@props.heading} fn={@onCheckBox}>
@@ -185,7 +240,6 @@ DisableableItem = React.createClass
 
 module.exports =
   ItemList: ItemList
-  SearchBar: SearchBar
   SearchList: SearchList
   TextSection: TextSection
   OutputTextPanel: OutputTextPanel

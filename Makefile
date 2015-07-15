@@ -16,7 +16,7 @@ UGLIFY_JS_OPTS := -mc --screw-ie8
 
 # external js
 REACT_JS := react
-EXTERN_JS := $(REACT_JS) $(JQUERY)
+EXTERN_JS := $(REACT_JS) $(FUSE_JS)
 
 BOOTSTRAP := bootstrap
 FONT_AWESOME := font-awesome

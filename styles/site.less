@@ -1,7 +1,5 @@
 @generic-foreground-color: #fff;
 @generic-background-color: #f2f2f2;
-// @generic-background-color: #F2F2F2;
-// none repeat scroll 0% 0%
 html,
 body {
   background-color: @generic-background-color;
@@ -9,9 +7,27 @@ body {
 }
 
 @generic-dark-color: #333;
-label,
-p {
+@smarty-font: "Helvetica Neue",Helvetica,Arial,sans-serif;
+label, p {
   color: @generic-dark-color;
+  font-family: @smarty-font;
+}
+
+@medium-font-size: 10pt;
+.species-selection {
+  margin-bottom: 0;
+  margin-top: 0;
+  p {
+    color: #f0f;
+    font-size: @medium-font-size;
+    font-family: @smarty-font;
+    margin-bottom: 0;
+  }
+}
+
+@explanation-font-size: 9.5pt;
+.explanation-text {
+  font-size: @explanation-font-size;
 }
 
 .container-fluid {
@@ -25,6 +41,10 @@ p {
 @main-row-height: 300px;
 .tall-object {
   height: @main-row-height;
+  &.listing {
+    height: initial;
+    max-height: @main-row-height;
+  }
 }
 
 @short-row-height: 120px;
@@ -38,6 +58,16 @@ nav.navbar.navbar-default {
 
 .spaced {
   margin-top: 15px;
+}
+
+// outlines are tacky
+a, button {
+  outline: none !important;
+}
+
+@small-font-size: 8pt;
+.parameter-label {
+  font-size: @small-font-size;
 }
 
 @standard-border-radius: 5px;
@@ -64,14 +94,16 @@ nav.navbar.navbar-default {
     .scrollable-content;
     margin-bottom: 4px;
   }
+  // gross hack for cancel button
   .input-group {
     // make the corners line up
     input:not(.num) {
       border-bottom: @dark-border;
       border-radius: @standard-border-radius 0 0 0;
     }
-    button {
-      border-bottom-right-radius: 0;
+    button.btn {
+      border-radius: 0;
+      border-top-right-radius: @standard-border-radius;
     }
   }
   // panel display
@@ -122,17 +154,20 @@ nav.navbar.navbar-default {
 input[type=checkbox] {
   display: none;
 }
+
 input[type=checkbox] + label:before {
   font-family: FontAwesome;
   display: inline-block;
 }
+
 // letter-spacing is because the check mark moves around
 input[type=checkbox] + label:before {
-  letter-spacing: 10px;
+  letter-spacing: 1ex;
   content: "\f096";
 }
+
 input[type=checkbox]:checked + label:before {
-  letter-spacing: 8px;
+  letter-spacing: .7ex;
   content: "\f046";
 }
 
