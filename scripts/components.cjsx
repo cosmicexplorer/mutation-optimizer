@@ -22,8 +22,10 @@ stringToColor = (str) ->
     color += ('00' + ((hash << i * 3) & 0xFF).toString(16)).slice(-2)
   color
 # make fuzzy search regex by inserting wildcards between every letter
+quoteRegex = (str) ->
+  (str + '').replace /[.?*+^$[\]\\(){}|-]/g, "\\$&"
 transformInputText = (text) ->
-  text.split('').join('.*')
+  quoteRegex(text).split('').join('.*')
 # used to have this split into two components, the search bar and the ItemList,
 # and couldn't figure out how to allow the user to input text, but also allow me
 # to input text when changing state. this is less modular, but it works.
