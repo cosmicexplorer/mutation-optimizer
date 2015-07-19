@@ -4,13 +4,13 @@
 NODE_DIR := node_modules
 
 # node binaries
-NPM_BIN = $(shell npm bin)
-CJSX_CC = $(NPM_BIN)/cjsx
-COFFEE_CC = $(NPM_BIN)/coffee
-LESS_CC = $(NPM_BIN)/lessc
-UGLIFY_JS = $(NPM_BIN)/uglifyjs
-BROWSERIFY = $(NPM_BIN)/browserify
-CLEAN_CSS = $(NPM_BIN)/cleancss
+NPM_BIN := $(NODE_DIR)/.bin
+CJSX_CC := $(NPM_BIN)/cjsx
+COFFEE_CC := $(NPM_BIN)/coffee
+LESS_CC := $(NPM_BIN)/lessc
+UGLIFY_JS := $(NPM_BIN)/uglifyjs
+BROWSERIFY := $(NPM_BIN)/browserify
+CLEAN_CSS := $(NPM_BIN)/cleancss
 
 UGLIFY_JS_OPTS := -mc --screw-ie8
 

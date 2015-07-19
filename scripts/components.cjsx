@@ -234,18 +234,20 @@ MutationOptimizerApp = React.createClass
             <a className="navbar-brand" href="#" target="_blank">
               mutation-optimizer v0.0
             </a>
+            {
+              <a href={val} target="_blank" key={key}>
+                <button type="button" className="btn btn-default navbar-btn">
+                {key}
+                </button>
+              </a> for key, val of S.NavbarButtons
+            }
           </div>
-          {<a href={val} target="_blank"> key={key}
-            <button type="button" className="btn btn-default navbar-btn">
-              {key}
-            </button>
-           </a> for key, val in S.NavbarButtons}
           <p id="speciesSelected" style={
             if @state.selectedElement
               color: stringToColor @state.selectedElement
             else
               color: S.DefaultSpeciesColor}
-            className="navbar-text species-selected pull-right">
+            className="navbar-text species-selected navbar-right">
               {@state.selectedElement or S.DefaultSpeciesText}
           </p>
         </div>
