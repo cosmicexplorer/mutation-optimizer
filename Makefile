@@ -18,10 +18,12 @@ UGLIFY_JS_OPTS := -mc --screw-ie8
 REACT_JS := react
 EXTERN_JS := $(REACT_JS) $(FUSE_JS)
 
+# external css
 BOOTSTRAP := bootstrap
 FONT_AWESOME := font-awesome
 EXTERN_CSS := $(BOOTSTRAP) $(FONT_AWESOME)
 
+# deps that make can consume
 EXTERN_JS_PROOFS := $(patsubst %,$(NODE_DIR)/%/README.md,$(EXTERN_JS))
 EXTERN_CSS_PROOFS := $(patsubst %,$(NODE_DIR)/%/README.md,$(EXTERN_CSS))
 
