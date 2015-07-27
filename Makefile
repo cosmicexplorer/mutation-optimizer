@@ -12,6 +12,7 @@ UGLIFY_JS := $(NPM_BIN)/uglifyjs
 BROWSERIFY := $(NPM_BIN)/browserify
 CLEAN_CSS := $(NPM_BIN)/cleancss
 BABEL_CC := $(NPM_BIN)/babel
+MAKE_PIPE := $(NPM_BIN)/make-pipe
 
 COFFEE_OPTS := -bc --no-header
 UGLIFY_JS_OPTS := -mc --screw-ie8
@@ -61,21 +62,23 @@ TARGETS := $(JS_FINAL) $(CSS_OUT) $(BROWSERIFY_EXTERN_BUNDLE)
 all: $(TARGETS)
 
 $(JS_FINAL): $(JS_OUT) $(DEPS)
-	$(BROWSERIFY) -t babelify $(BROWSERIFY_EXTERN_NOREQ) $(JS_OUT) | \
-		$(UGLIFY_JS) $(UGLIFY_JS_OPTS) -o $@
+	$(MAKE_PIPE) $(BROWSERIFY) -t babelify $(BROWSERIFY_EXTERN_NOREQ) \
+		$(JS_OUT) '|' $(UGLIFY_JS) $(UGLIFY_JS_OPTS) -o $@
 
 $(BROWSERIFY_EXTERN_BUNDLE): $(DEPS)
-	$(BROWSERIFY) $(BROWSERIFY_EXTERN_REQUIRE) | \
+	$(MAKE_PIPE) $(BROWSERIFY) $(BROWSERIFY_EXTERN_REQUIRE) '|' \
 		$(UGLIFY_JS) $(UGLIFY_JS_OPTS) -o $@
 
 %.js: %.coffee $(DEPS)
-	$(COFFEE_CC) $(COFFEE_OPTS) -p $< | $(BABEL_CC) $(BABEL_OPTS) -o $@
+	$(MAKE_PIPE) $(COFFEE_CC) $(COFFEE_OPTS) -p $< '|' $(BABEL_CC) \
+		$(BABEL_OPTS) -o $@
 
 %.js: %.cjsx $(DEPS)
-	$(CJSX_CC) $(COFFEE_OPTS) -p $< | $(BABEL_CC) $(BABEL_OPTS) -o $@
+	$(MAKE_PIPE) $(CJSX_CC) $(COFFEE_OPTS) -p $< '|' $(BABEL_CC) \
+		$(BABEL_OPTS) -o $@
 
 %.css: %.less $(DEPS)
-	$(LESS_CC) $< | $(CLEAN_CSS) -o $@
+	$(MAKE_PIPE) $(LESS_CC) $< '|' $(CLEAN_CSS) -o $@
 
 clean:
 	rm -f $(TARGETS) $(JS_OUT)
