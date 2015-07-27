@@ -15,13 +15,14 @@ BABEL_CC := $(NPM_BIN)/babel
 MAKE_PIPE := $(NPM_BIN)/make-pipe
 
 COFFEE_OPTS := -bc --no-header
-UGLIFY_JS_OPTS := -mc --screw-ie8
+UGLIFY_JS_OPTS := -mc --screw-ie8 2>/dev/null
 BABEL_OPTS := --optional runtime
 
 # external js
 REACT_JS := react
 BABEL_RUNTIME := babel-runtime
-EXTERN_JS := $(REACT_JS)
+BABEL_INTERNAL := core-js regenerator
+EXTERN_JS := $(REACT_JS) $(patsubst %,$(BABEL_RUNTIME)/%,$(BABEL_INTERNAL))
 
 # external css
 BOOTSTRAP := bootstrap
