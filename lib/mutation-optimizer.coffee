@@ -1,12 +1,7 @@
-# not sure how best to structure this but i think a more functional style will
-# make it easier down the road, so top-level objects are basically just
-# namespaces for now
+utils = require './utils'
+symbols = require './symbols'
 
-# all functions should take and return arrays so we can do mutable operations
-# more easily and quickly. bounce to string and back if you need regex
-
-# (the above comments are mostly for me, please don't feel like you have to
-# follow them)
+CODON_LENGTH = 3
 
 class SequenceError
   constructor: (@message, @type) ->
@@ -14,13 +9,16 @@ class SequenceError
 class Sequence
   err: (str) -> throw new SequenceError str, @constructor.name
   check: (seq) -> seq
-  constructor: (@seq) ->
+  constructor: (seq) ->
+    @seq = if seq.constructor is Array
+        seq.map (el) -> el.toUpperCase()
+      else seq.toUpperCase().split ''
   clean: ->
     cst = @constructor
-    cleaned = @seq.split('').map((sym) ->
+    cleaned = @seq.map((sym) ->
       @err "non-IUPAC symbol: #{sym}" if cst.ValidIUPACSyms?.has sym
       cst.TransformSyms?.get sym or sym).join ''
-    @fixEnds? @check(cleaned), cst.FixEndOpts
+    @fixEnds @check(cleaned), cst.FixEndOpts
   fixEnds: (strOrArr, opts) ->
     { beg, end, doThrow } = opts
     if beg
@@ -36,10 +34,8 @@ class Sequence
     strOrArr
 
 class AminoAcidSequence
-  constructor: (@seq) ->
-  @ValidIUPACSyms: new Set ['W','L','P','H','Q','R','I','M','T','N','K','S','V',
-    'A','D','E','G','F','Y','C','-']
-  @TransformSyms: new Map ['*': '-', 'X': '-']
+  @ValidIUPACSyms: new Set symbols.AminoIUPAC
+  @TransformSyms: new Map symbols.AminoTransform
   @FixEndOpts:
     beg:
       len: 1
@@ -49,8 +45,9 @@ class AminoAcidSequence
       text: new Set ['-']
 
 class DNASequence
-  @ValidIUPACSyms: ['A','T','G','C','U','R','Y','N']
-  @TransformSyms: new Map ['U': 'T']
+  @ValidIUPACSyms: symbols.DNAIUPAC
+  @CodonAminoMap: new Map utils.ConvoluteKeysValues symbols.DNACodonAminoMap
+  @TransformSyms: new Map symbols.DNATransformSyms
 
   @StartCodons: ['ATG']
   @StopCodons: ['TGA', 'TAG', 'TAA']
@@ -71,3 +68,7 @@ class DNASequence
       if ind > 0 and ind < seq.length - 3 and ind % 3 is 0
         @err "Premature stop codon #{codon} at index #{ind}"
     seq
+
+  toAminoSeq: ->
+    new AminoAcidSequence @clean().splitLength(CODON_LENGTH).map (codon) ->
+      @constructor.CodonAminoMap.get(codon) or @err "codon #{codon} is invalid"

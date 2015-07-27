@@ -82,10 +82,11 @@ $(BROWSERIFY_EXTERN_BUNDLE): $(DEPS)
 	$(MAKE_PIPE) $(LESS_CC) $< '|' $(CLEAN_CSS) -o $@
 
 clean:
-	rm -f $(TARGETS) $(JS_OUT)
+	rm -f $(JS_FINAL) $(CSS_OUT) $(JS_OUT)
 
 $(DEPS):
 	npm install
 
 distclean: clean
+	rm -f $(BROWSERIFY_EXTERN_BUNDLE)
 	rm -rf $(NODE_DIR)
