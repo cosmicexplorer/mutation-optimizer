@@ -17,9 +17,9 @@ class Sequence
   constructor: (@seq) ->
   clean: ->
     cst = @constructor
-    cleaned = @seq.map (sym) ->
+    cleaned = @seq.split('').map((sym) ->
       @err "non-IUPAC symbol: #{sym}" if cst.ValidIUPACSyms?.has sym
-      cst.TransformSyms?.get sym or sym
+      cst.TransformSyms?.get sym or sym).join ''
     @fixEnds? @check(cleaned), cst.FixEndOpts
   fixEnds: (strOrArr, opts) ->
     { beg, end, doThrow } = opts
@@ -51,17 +51,23 @@ class AminoAcidSequence
 class DNASequence
   @ValidIUPACSyms: ['A','T','G','C','U','R','Y','N']
   @TransformSyms: new Map ['U': 'T']
+
+  @StartCodons: ['ATG']
+  @StopCodons: ['TGA', 'TAG', 'TAA']
+
   @FixEndOpts:
     beg:
       len: 3
-      text: new Set ['ATG']
+      text: new Set @constructor.StartCodons
     end:
       len: 3
-      text: new Set ['TGA', 'TAG', 'TAA']
+      text: new Set @constructor.StopCodons
     doThrow: on
 
   check: (seq) ->
-    if seq.length % 3
-      throw new SequenceError "not multiple of 3: #{seq.length}",
-        @constructor.name
+    @err "not multiple of 3: #{seq.length}" if seq.length % 3
+    @constructor.StopCodons.forEach (codon) ->
+      ind = seq.indexOf codon
+      if ind > 0 and ind < seq.length - 3 and ind % 3 is 0
+        @err "Premature stop codon #{codon} at index #{ind}"
     seq
