@@ -33,7 +33,7 @@ class Sequence
         strOrArr = strOrArr + end
     strOrArr
 
-class AminoAcidSequence
+class AminoAcidSequence extends Sequence
   @ValidIUPACSyms: new Set symbols.AminoIUPAC
   @TransformSyms: new Map symbols.AminoTransform
   @FixEndOpts:
@@ -44,8 +44,8 @@ class AminoAcidSequence
       len: 1
       text: new Set ['-']
 
-class DNASequence
-  @ValidIUPACSyms: symbols.DNAIUPAC
+class DNASequence extends Sequence
+  @ValidIUPACSyms: new Set symbols.DNAIUPAC
   @CodonAminoMap: new Map utils.ConvoluteKeysValues symbols.DNACodonAminoMap
   @TransformSyms: new Map symbols.DNATransformSyms
 
