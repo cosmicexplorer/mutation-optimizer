@@ -345,7 +345,7 @@ def minimize_overall_mutation(aa_seq):          # Main function. Weighs all muta
             weighted_pyr_dimers=weighted_pyr_dimer_count(possible_codon_windows[j])
             methyl_sites=methylation_sites(possible_codon_windows[j])
             run_repeats=repeat_runs(possible_codon_windows[j])
-            homologies=homology_repeats(possible_codon_windows[j])
+            homologies=homology_repeats(possible_codon_windows[j],seq_construction)
             deaminated_sites=deamination_sites(possible_codon_windows[j])
             alkylated_sites=alkylation_sites(possible_codon_windows[j])
             oxidized_sites=oxidation_sites(possible_codon_windows[j])
@@ -354,7 +354,8 @@ def minimize_overall_mutation(aa_seq):          # Main function. Weighs all muta
             IS_sites=insertion_sequences(possible_codon_windows[j])
             anti_sd_sites=anti_shine_delgarno_count(possible_codon_windows[j])
             blacklisted_codons=rate_limiting_codon_count(possible_codon_windows[j])
-            mutability_score=float(5*weighted_pyr_dimers+7*methyl_sites+6.4*run_repeats+3.5*homologies+0.3*deaminated_sites+0.4*alkylated_sites+1.25*oxidized_sites+0.2*other_misc_sites+0.9*hairpins+4.2*IS_sites+5.8*anti_sd_sites+1000*blacklisted_codons)  # Method of ranking sequences based on arbitrary coefficients before each hotspot type.
+            RFC10_illegal=RFC10_sites(possible_codon_windows[j])
+            mutability_score=float(5*weighted_pyr_dimers+7*methyl_sites+6.4*run_repeats+3.5*homologies+0.3*deaminated_sites+0.4*alkylated_sites+1.25*oxidized_sites+0.2*other_misc_sites+0.9*hairpins+4.2*IS_sites+5.8*anti_sd_sites+1000*blacklisted_codons+1000*RFC10_illegal)  # Method of ranking sequences based on arbitrary coefficients before each hotspot type.
             mutability_scores.append(mutability_score-seq_codon_usage_avg(possible_codon_windows[j]))
         optimal_index=mutability_scores.index(min(mutability_scores))           # The sequence with the lowest score based on the above formula is selected as the optimal sequence
         if i <len(aa_seq)-3:
@@ -431,7 +432,7 @@ def minimize_overall_mutation_conservative(aa_seq):   # currently too limited in
             weighted_pyr_dimers=weighted_pyr_dimer_count(possible_codon_windows[j])
             methyl_sites=methylation_sites(possible_codon_windows[j])
             run_repeats=repeat_runs(possible_codon_windows[j])
-            homologies=homology_repeats(possible_codon_windows[j])
+            homologies=homology_repeats(possible_codon_windows[j],seq_construction)
             deaminated_sites=deamination_sites(possible_codon_windows[j])
             alkylated_sites=alkylation_sites(possible_codon_windows[j])
             oxidized_sites=oxidation_sites(possible_codon_windows[j])
@@ -440,7 +441,8 @@ def minimize_overall_mutation_conservative(aa_seq):   # currently too limited in
             IS_sites=insertion_sequences(possible_codon_windows[j])
             anti_sd_sites=anti_shine_delgarno_count(possible_codon_windows[j])
             blacklisted_codons=rate_limiting_codon_count(possible_codon_windows[j])
-            mutability_score=float(5*weighted_pyr_dimers+7*methyl_sites+24*run_repeats+24*homologies+0.3*deaminated_sites+0.4*alkylated_sites+1.25*oxidized_sites+0.2*other_misc_sites+0.9*hairpins+4.2*IS_sites+5.8*anti_sd_sites+1000*blacklisted_codons)  # This score is again an imperfect solution, since the coefficient weight I assigned were arbitrary. The ideal would be selecting the one with a minimum of all sites, with a hierarchy in the event two sequences differ only by the first sequence having hotspot X and the second sequence getting rid of X by creating hotspot Y in its place
+            RFC10_illegal=RFC10_sites(possible_codon_windows[j])
+            mutability_score=float(5*weighted_pyr_dimers+7*methyl_sites+24*run_repeats+24*homologies+0.3*deaminated_sites+0.4*alkylated_sites+1.25*oxidized_sites+0.2*other_misc_sites+0.9*hairpins+4.2*IS_sites+5.8*anti_sd_sites+1000*blacklisted_codons+1000*RFC10_illegal)  # This score is again an imperfect solution, since the coefficient weight I assigned were arbitrary. The ideal would be selecting the one with a minimum of all sites, with a hierarchy in the event two sequences differ only by the first sequence having hotspot X and the second sequence getting rid of X by creating hotspot Y in its place
             mutability_scores.append(mutability_score-seq_codon_usage_avg(possible_codon_windows[j]))
         optimal_index=mutability_scores.index(min(mutability_scores))           # The sequence with the lowest number of hostpots, weighted by those arbitrary coefficients, is selected as the optimal sequence
         if i <len(aa_seq)-2:
@@ -523,7 +525,8 @@ def minimize_pyr_dimer_mutation(aa_seq):
         for j in range(0,len(possible_codon_windows)):              # Calculates the number of each type of mutation hotspot in the sequence
             weighted_pyr_dimers=weighted_pyr_dimer_count(possible_codon_windows[j])
             blacklisted_codons=rate_limiting_codon_count(possible_codon_windows[j])
-            mutability_score=float(weighted_pyr_dimers+1000*blacklisted_codons)
+            RFC10_illegal=RFC10_sites(possible_codon_windows[j])
+            mutability_score=float(weighted_pyr_dimers+1000*blacklisted_codons+1000*RFC10_illegal)
             mutability_scores.append(mutability_score-seq_codon_usage_avg(possible_codon_windows[j]))
         optimal_index=mutability_scores.index(min(mutability_scores))           # The sequence with the lowest number of hostpots, weighted by those arbitrary coefficients, is selected as the optimal sequence
         if i <len(aa_seq)-3:
@@ -533,27 +536,6 @@ def minimize_pyr_dimer_mutation(aa_seq):
             break
     seq_construction=''.join(seq_construction)
     return seq_construction
-
-
-def minimize_homology_search(dna_seq):
-    dna_seq=dna_seq_check(dna_seq)
-    dna_seq=''.join(dna_seq)
-    for i in range(0,len(dna_seq)-4):
-        truncated_seq=dna_seq[i+1:len(dna_seq)]
-        repeat_index=truncated_seq.find(dna_seq[i:i+4])
-        if repeat_index>0:
-            '''
-            find which two codons the repeat is a part of
-            copy mut opt software for reverse translating two codons
-            search through possibilities to see if one no longer has POSSIBILITY_N.find(dna_seq[i:i+4])
-            if find possibility, replace dna_seq at location with new sequence
-            '''
-            repeat_index.append(i)
-    print(repeat_index)
-
-# temp_seq='ATGcaatGCCCAcaatGA'
-# inimize_homology_search(temp_seq)
-
 
 def maximize_mutation(aa_seq):    # does the opposite as the overall minimize function (ie chooses highest mutation score, not lowest)
     aa_seq=aa_seq_check(aa_seq)
@@ -630,7 +612,7 @@ def maximize_mutation(aa_seq):    # does the opposite as the overall minimize fu
             weighted_pyr_dimers=weighted_pyr_dimer_count(possible_codon_windows[j])
             methyl_sites=methylation_sites(possible_codon_windows[j])
             run_repeats=repeat_runs(possible_codon_windows[j])
-            homologies=homology_repeats(possible_codon_windows[j])
+            homologies=homology_repeats(possible_codon_windows[j],seq_construction)
             deaminated_sites=deamination_sites(possible_codon_windows[j])
             alkylated_sites=alkylation_sites(possible_codon_windows[j])
             oxidized_sites=oxidation_sites(possible_codon_windows[j])
@@ -639,7 +621,8 @@ def maximize_mutation(aa_seq):    # does the opposite as the overall minimize fu
             IS_sites=insertion_sequences(possible_codon_windows[j])
             anti_sd_sites=anti_shine_delgarno_count(possible_codon_windows[j])
             blacklisted_codons=rate_limiting_codon_count(possible_codon_windows[j])
-            mutability_score=float(15*weighted_pyr_dimers+3*methyl_sites+3.4*run_repeats+1.5*homologies+0.3*deaminated_sites+0.4*alkylated_sites+0.35*oxidized_sites+0.2*other_misc_sites+0.9*hairpins+4.2*IS_sites+5.9*anti_sd_sites-1000*blacklisted_codons)  # This score is again an imperfect solution, since the coefficient weight I assigned were arbitrary. The ideal would be selecting the one with a minimum of all sites, with a hierarchy in the event two sequences differ only by the first sequence having hotspot X and the second sequence getting rid of X by creating hotspot Y in its place
+            RFC10_illegal=RFC10_sites(possible_codon_windows[j])
+            mutability_score=float(15*weighted_pyr_dimers+3*methyl_sites+3.4*run_repeats+1.5*homologies+0.3*deaminated_sites+0.4*alkylated_sites+0.35*oxidized_sites+0.2*other_misc_sites+0.9*hairpins+4.2*IS_sites+5.9*anti_sd_sites-1000*blacklisted_codons-1000*RFC10_illegal)  # This score is again an imperfect solution, since the coefficient weight I assigned were arbitrary. The ideal would be selecting the one with a minimum of all sites, with a hierarchy in the event two sequences differ only by the first sequence having hotspot X and the second sequence getting rid of X by creating hotspot Y in its place
             mutability_scores.append(mutability_score-seq_codon_usage_avg(possible_codon_windows[j]))
         optimal_index=mutability_scores.index(max(mutability_scores))           # The sequence with the lowest number of hostpots, weighted by those arbitrary coefficients, is selected as the optimal sequence
         if i <len(aa_seq)-3:
@@ -664,11 +647,12 @@ def maximize_pyr_dimer_mutation(aa_seq):
                 all_possible_codons.append(codon_table[i])
                 break
     seq_construction=[]
-    for i in range(0,len(aa_seq)-2):
+    for i in range(0,len(aa_seq)-3):
         possible_codon_windows=[]           # goes through every possible codon for given amino acid, then appends possibilty to growing list
         pos_codon1=[]
         pos_codon2=[]
         pos_codon3=[]
+        pos_codon4=[]
         for codon_option in all_possible_codons[i]:
             if codon_option[2]=='Y':
                 pos_codon1.append([codon_option[0]+codon_option[1]+'T'])
@@ -711,23 +695,39 @@ def maximize_pyr_dimer_mutation(aa_seq):
                 pos_codon3.append([codon_option[0]+codon_option[1]+'G'])
             elif codon_option[2] in ['A','C','G','T']:
                 pos_codon3.append([codon_option[0]+codon_option[1]+codon_option[2]])
+        for codon_option in all_possible_codons[i+3]:
+            if codon_option[2]=='Y':
+                pos_codon4.append([codon_option[0]+codon_option[1]+'T'])
+                pos_codon4.append([codon_option[0]+codon_option[1]+'C'])
+            elif codon_option[2]=='R':
+                pos_codon4.append([codon_option[0]+codon_option[1]+'A'])
+                pos_codon4.append([codon_option[0]+codon_option[1]+'G'])
+            elif codon_option[2]=='N':
+                pos_codon4.append([codon_option[0]+codon_option[1]+'A'])
+                pos_codon4.append([codon_option[0]+codon_option[1]+'C'])
+                pos_codon4.append([codon_option[0]+codon_option[1]+'T'])
+                pos_codon4.append([codon_option[0]+codon_option[1]+'G'])
+            elif codon_option[2] in ['A','C','G','T']:
+                pos_codon4.append([codon_option[0]+codon_option[1]+codon_option[2]])
         for j1 in pos_codon1:
             for j2 in pos_codon2:
                 for j3 in pos_codon3:
-                    possible_codon_windows.append(j1+j2+j3)
+                    for j4 in pos_codon4:
+                        possible_codon_windows.append(j1+j2+j3+j4)
         for k in range(0,len(possible_codon_windows)):
             possible_codon_windows[k]=''.join(possible_codon_windows[k])
         mutability_scores=[]
         for j in range(0,len(possible_codon_windows)):              # Calculates the number of each type of mutation hotspot in the sequence
             weighted_pyr_dimers=weighted_pyr_dimer_count(possible_codon_windows[j])
             blacklisted_codons=rate_limiting_codon_count(possible_codon_windows[j])
-            mutability_score=float(weighted_pyr_dimers-1000*blacklisted_codons)  # This score is again an imperfect solution, since the coefficient weight I assigned were arbitrary. The ideal would be selecting the one with a minimum of all sites, with a hierarchy in the event two sequences differ only by the first sequence having hotspot X and the second sequence getting rid of X by creating hotspot Y in its place
+            RFC10_illegal=RFC10_sites(possible_codon_windows[j])
+            mutability_score=float(weighted_pyr_dimers-10000*blacklisted_codons-10000*RFC10_illegal)  # This score is again an imperfect solution, since the coefficient weight I assigned were arbitrary. The ideal would be selecting the one with a minimum of all sites, with a hierarchy in the event two sequences differ only by the first sequence having hotspot X and the second sequence getting rid of X by creating hotspot Y in its place
             mutability_scores.append(mutability_score-seq_codon_usage_avg(possible_codon_windows[j]))
         optimal_index=mutability_scores.index(max(mutability_scores))           # The sequence with the lowest number of hostpots, weighted by those arbitrary coefficients, is selected as the optimal sequence
-        if i <len(aa_seq)-3:
+        if i <len(aa_seq)-4:
             seq_construction.append(possible_codon_windows[optimal_index][0:3])
-        elif i==len(aa_seq)-3:
-            seq_construction.append(possible_codon_windows[optimal_index][0:10])
+        elif i==len(aa_seq)-4:
+            seq_construction.append(possible_codon_windows[optimal_index][0:13])
     seq_construction=''.join(seq_construction)
     return seq_construction
 
@@ -803,7 +803,8 @@ def maximize_oxidative_mutation(aa_seq):
         for j in range(0,len(possible_codon_windows)):              # Calculates the number of each type of mutation hotspot in the sequence
             oxidized_sites=oxidation_sites(possible_codon_windows[j])
             blacklisted_codons=rate_limiting_codon_count(possible_codon_windows[j])
-            mutability_score=float(oxidized_sites-1000*blacklisted_codons)  # This score is again an imperfect solution, since the coefficient weight I assigned were arbitrary. The ideal would be selecting the one with a minimum of all sites, with a hierarchy in the event two sequences differ only by the first sequence having hotspot X and the second sequence getting rid of X by creating hotspot Y in its place
+            RFC10_illegal=RFC10_sites(possible_codon_windows[j])
+            mutability_score=float(oxidized_sites-1000*blacklisted_codons-1000*RFC10_illegal)  # This score is again an imperfect solution, since the coefficient weight I assigned were arbitrary. The ideal would be selecting the one with a minimum of all sites, with a hierarchy in the event two sequences differ only by the first sequence having hotspot X and the second sequence getting rid of X by creating hotspot Y in its place
             mutability_scores.append(mutability_score-seq_codon_usage_avg(possible_codon_windows[j]))
         optimal_index=mutability_scores.index(max(mutability_scores))           # The sequence with the lowest number of hostpots, weighted by those arbitrary coefficients, is selected as the optimal sequence
         if i <len(aa_seq)-3:
@@ -825,6 +826,10 @@ def seq_codon_usage_avg(dna_seq):           # analogous to CAI calculations of c
     codon_usage_avg=codon_usage_sum/len(dna_seq)
     return codon_usage_avg
 
+def RFC10_sites(dna_seq):
+    return dna_seq.count('GAATTC')+dna_seq.count('TCTAGA')+dna_seq.count('ACTAGT')+dna_seq.count('CTGCAG')
+
+
 def rate_limiting_codon_count(dna_seq):         # set of codons in E coli that are of very low tRNA abundance and can stall translation
     dna_seq=list(dna_seq)
     dna_seq=''.join(dna_seq)
@@ -832,7 +837,7 @@ def rate_limiting_codon_count(dna_seq):         # set of codons in E coli that a
     blacklist_codon_count=0
     for i in range(0,len(dna_seq)//3):
         codon=dna_seq[i+codon_count]+dna_seq[i+codon_count+1]+dna_seq[i+codon_count+2]
-        if codon=='CTA' or codon=='TAG' or codon=='CGA' or codon=='AGA' or codon=='AGG':
+        if codon=='CTA' or codon=='TAG' or codon=='CGA' or codon=='CGG' or codon=='AGA' or codon=='AGG' or codon=='ATA':
             blacklist_codon_count+=1
         codon_count+=2
     return blacklist_codon_count
@@ -880,38 +885,41 @@ def repeat_runs(dna_seq):           # same base repeated four times or more in a
             run_repeats+=1
     return run_repeats
 
-def homology_repeats(dna_seq):      # sequence of 6 bases that shows up more than once in sequence
-    homologies=0
-    for i in range(0,len(dna_seq)-5):
-        seq_window=dna_seq[i]+dna_seq[i+1]+dna_seq[i+2]+dna_seq[i+3]+dna_seq[i+4]+dna_seq[i+5]
-        if not any(base in seq_window for base in ('R', 'Y', 'N')):
-            if dna_seq.count(seq_window)>=2:
-                homologies+=1
-    return homologies
+def homology_repeats(base_search_seq,constructed_dna_seq):      # sees if any 4-bp part of possible_codon_seq is alrady present in constructed output sequence
+    constructed_dna_seq=''.join(constructed_dna_seq)
+    homology_count=0
+    for i in range(0,len(base_search_seq)-4):
+        search_seq=base_search_seq[i]+base_search_seq[i+1]+base_search_seq[i+2]+base_search_seq[i+3]
+        repeat_index=constructed_dna_seq.find(search_seq)
+        if repeat_index>0:
+            homology_count+=1
+    return homology_count
 
 def deamination_sites(dna_seq):
     return dna_seq.count('CG')+dna_seq.count('GC')
 
 def alkylation_sites(dna_seq):
-    return dna_seq.count('RG')+dna_seq.count('GG')+dna_seq.count('AG')+dna_seq.count('TC')
+    return dna_seq.count('GG')+dna_seq.count('AG')+dna_seq.count('TC')+dna_seq.count('GA')
 
 def oxidation_sites(dna_seq):
     return dna_seq.count('GGG')+dna_seq.count('GG')+dna_seq.count('CCC')+dna_seq.count('CC')
 
 def misc_other_sites(dna_seq):
-    return dna_seq.count('YTG')+dna_seq.count('TTG')+dna_seq.count('CTG')+dna_seq.count('GTGG')+dna_seq.count('GGCGCC')
+    return dna_seq.count('TTG')+dna_seq.count('CTG')+dna_seq.count('GTGG')+dna_seq.count('CCAC')+dna_seq.count('GGCGCC')+dna_seq.count('GGCGCC')
 
 def hairpin_sites(dna_seq):             # can form secondary structure in mRNA
     return dna_seq.count('CCTCCGG')+dna_seq.count('CCNNNGG')+dna_seq.count('CGNNNCG')+dna_seq.count('GCNNNGC')+dna_seq.count('GGNNNCC')
 
-def insertion_sequences(dna_seq):   # E. coli only
-    ISEc17=dna_seq.count('TGCGGACGATCATCAGTTAT')
-    IS903B=dna_seq.count('GATCGTTGGGAACCG')
-    IS50R=dna_seq.count('GCAGTCAGGCACCGT')+dna_seq.count('TAAGCTTTAATGCGC')+dna_seq.count('GCAGTCAGGCACCGT')+dna_seq.count('GCCGCCCAGTCCTGC')+dna_seq.count('GTCTGACGC')
-    IS3411=dna_seq.count('CAGGAAAGA')
-    IS30=dna_seq.count('AGTGCCATCTCCTT')+dna_seq.count('TTACCTGGTGC')
-    IS1A=dna_seq.count('TTGTGTTTTTCAT')
-    return ISEc17+IS903B+IS50R+IS3411+IS30+IS1A
+def insertion_sequences(dna_seq):   # E. coli only    from https://www-is.biotoul.fr/
+    ISEc17=dna_seq.count('TGCGGACGATCATCAGTTAT')+dna_seq.count('ATAACTGATGATCGTCCGCA')
+    IS903B=dna_seq.count('GATCGTTGGGAACCG')+dna_seq.count('CGGTTCCCAACGATC')
+    IS50R=dna_seq.count('GCAGTCAGGCACCGT')+dna_seq.count('TAAGCTTTAATGCGC')+dna_seq.count('GCAGTCAGGCACCGT')+dna_seq.count('GCCGCCCAGTCCTGC')
+    IS30=dna_seq.count('AGTGCCATCTCCTT')+dna_seq.count('AAGGAGATGGCACT')
+    IS103=dna_seq.count('TGTATCAGTGGGGCTTTG')+dna_seq.count('CAAAGCCCCACTGATACA')
+    IS1A=dna_seq.count('TTGTGTTTTTCAT')+dna_seq.count('ATGAAAAACACAA')+dna_seq.count('GGCATACTCTGCGACATCGT')+dna_seq.count('ACGATGTCGCAGAGTATGCC')+dna_seq.count('CTTATGACATTAAAAGTAAC')+dna_seq.count('TGAATAGCCTGTCTTACA')+dna_seq.count('TAACTGTTTCTTTTTGTT')
+    IS1G=dna_seq.count('CAGTCAGG')+dna_seq.count('CCTGACTG')
+    IS3=dna_seq.count('AAGTATATCA')+dna_seq.count('TGATATACTT')
+    return ISEc17+IS903B+IS50R+IS30+IS103+IS1A+IS1G+IS3
 
 def find_seq_changes(original_seq,optimized_seq,target):        # Compares input and output sequences, and highlights which bases were changed to remove hotspots
     target=str(target)
@@ -953,6 +961,14 @@ def seq_change_summary(original_seq,optimized_seq):     # determines which base 
     ox_site_changes_dub=set(ox_site_changes_dub)
     print('An oxidation site was eliminated at positions:',ox_site_changes_dub)  # actual site spans index and index+1
     print('An oxidation site was eliminated at positions:',ox_site_changes_tri)  # actual site spans index, index+1, and index+2)
+    methyl_site_changes_quad=find_seq_changes(original_seq,optimized_seq,'GATC')
+    methyl_site_changes_quad.extend(find_seq_changes(original_seq,optimized_seq,'CTAG'))
+    methyl_site_changes_pent=find_seq_changes(original_seq,optimized_seq,'CCAGG')
+    methyl_site_changes_pent.extend(find_seq_changes(original_seq,optimized_seq,'CCTGG'))
+    methyl_site_changes_pent.extend(find_seq_changes(original_seq,optimized_seq,'GGTCC'))
+    methyl_site_changes_pent.extend(find_seq_changes(original_seq,optimized_seq,'GGACC'))
+    print('An oxidation site was eliminated at positions:',methyl_site_changes_quad) # actual site spans index,index+1, index+2, index+3
+    print('An oxidation site was eliminated at positions:',methyl_site_changes_pent) # actual site spans index,index+1, index+2, index+3, index+4
     '''
     additional hotspot functions to be added later
     '''
@@ -1041,4 +1057,11 @@ print('There are %d total dimers in the maximized sequence (a %d percent reducti
 print('There are %d total dimers in the minimized sequence (a %d percent increase from control)'%(max_tot_dimer,(100*((max_tot_dimer/orig_tot_dimer)-1))))
 print(max_dna_seq)
 '''
-# E1010_seq='ATGGCTTCCTCCGAAGACGTTATCAAAGAGTTCATGCGTTTCAAAGTTCGTATGGAAGGTTCCGTTAACGGTCACGAGTTCGAAATCGAAGGTGAAGGTGAAGGTCGTCCGTACGAAGGTACCCAGACCGCTAAACTGAAAGTTACCAAAGGTGGTCCGCTGCCGTTCGCTTGGGACATCCTGTCCCCGCAGTTCCAGTACGGTTCCAAAGCTTACGTTAAACACCCGGCTGACATCCCGGACTACCTGAAACTGTCCTTCCCGGAAGGTTTCAAATGGGAACGTGTTATGAACTTCGAAGACGGTGGTGTTGTTACCGTTACCCAGGACTCCTCCCTGCAAGACGGTGAGTTCATCTACAAAGTTAAACTGCGTGGTACCAACTTCCCGTCCGACGGTCCGGTTATGCAGAAAAAAACCATGGGTTGGGAAGCTTCCACCGAACGTATGTACCCGGAAGACGGTGCTCTGAAAGGTGAAATCAAAATGCGTCTGAAACTGAAAGACGGTGGTCACTACGACGCTGAAGTTAAAACCACCTACATGGCTAAAAAACCGGTTCAGCTGCCGGGTGCTTACAAAACCGACATCAAACTGGACATCACCTCCCACAACGAAGACTACACCATCGTTGAACAGTACGAACGTGCTGAAGGTCGTCACTCCACCGGTGCTTAA'
+
+# for generating overall opt sequences
+'''
+inp_seq='atgaatatatttgaaatgttacgtatagatgaaggtcttagacttaaaatctataaagacacagaaggctattacactattggcatcggtcatttgcttacaaaaagtccatcacttaatgctgctaaatctgaattagataaagctattgggcgtaattgcaatggtgtaattacaaaagatgaggctgaaaaactctttaatcaggatgttgatgctgctgttcgcggaatcctgagaaatgctaaattaaaaccggtttatgattctcttgatgcggttcgtcgctgtgcattgattaatatggttttccaaatgggagaaaccggtgtggcaggatttactaactctttacgtatgcttcaacaaaaacgctgggatgaagcagcagttaacttagctaaaagtagatggtataatcaaacacctaatcgcgcaaaacgagtcattacaacgtttagaactggcacttgggacgcgtataaaaatctataa'
+inp_seq=dna_seq_check(inp_seq)
+opt_seq=minimize_overall_mutation(dna_to_aa_translation(inp_seq))
+print(opt_seq)
+'''
