@@ -14,22 +14,17 @@ whole since sequence may not begin/end on orf boundary
 - check if there appears to be at least one orf >= 20 bases in length
 
 - get at least 2-3k valid seqs for counting; if not, then attempt to apply above
-
-DO THIS!!!:
-- only check amino-converted seqs (?)
-  - look at change just made to python file in aa_seq_check
 ###
 
 class Sequence
   err: (str) -> throw new SequenceError str, @constructor.name
   check: (seq) -> seq
   constructor: (seq) ->
-    @seq = if seq.constructor is Array
-        seq.map (el) -> el.toUpperCase()
-      else seq.toUpperCase().split ''
+    # coerce to string
+    @seq = (if seq.constructor is Array then seq.join '' else seq).toUpperCase()
   clean: ->
     cst = @constructor
-    cleaned = @seq.map((sym) ->
+    cleaned = @seq.split('').map((sym) ->
       @err "non-IUPAC symbol: #{sym}" unless cst.ValidIUPACSyms[sym]
       cst.TransformSyms[sym] or sym).join ''
     @fixEnds @check(cleaned), cst.FixEndOpts
@@ -58,8 +53,8 @@ class AminoAcidSequence extends Sequence
       len: 1
       text: ['-']
   check: (seq) ->
-    # TODO: MAKE SEQ A STRING
     @err "orf of length >= 20 not found by heuristic" if seq.indexOf '-' < 20
+    seq
 
   # minimizeMutation: ->
   #   @clean().map
