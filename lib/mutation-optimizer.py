@@ -15,6 +15,11 @@ def aa_seq_check(aa_seq):               # Verifies valid user input for amino ac
         for aa in aa_seq:
             aa_sq.append(aa)
         aa_seq=aa_sq
+    # modification: assume single ORF per part
+    first_stop = aa_seq.find('-')
+    if first_stop < 20:
+        print('The sequence likely does not possess an ORF >= 20 amino acids long')
+        raise SystemExit
     return aa_seq
 
 def dna_seq_check(dna_seq):         # Verifies valid user input for DNA sequence. All functions assume a simple ORF, beginning with start codon and ending with stop
