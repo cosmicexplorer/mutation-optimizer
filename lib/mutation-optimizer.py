@@ -829,6 +829,7 @@ def seq_codon_usage_avg(dna_seq):           # analogous to CAI calculations of c
 def RFC10_sites(dna_seq):
     return dna_seq.count('GAATTC')+dna_seq.count('TCTAGA')+dna_seq.count('ACTAGT')+dna_seq.count('CTGCAG')
 
+# START ALG HERE
 
 def rate_limiting_codon_count(dna_seq):         # set of codons in E coli that are of very low tRNA abundance and can stall translation
     dna_seq=list(dna_seq)
@@ -920,6 +921,8 @@ def insertion_sequences(dna_seq):   # E. coli only    from https://www-is.biotou
     IS1G=dna_seq.count('CAGTCAGG')+dna_seq.count('CCTGACTG')
     IS3=dna_seq.count('AAGTATATCA')+dna_seq.count('TGATATACTT')
     return ISEc17+IS903B+IS50R+IS30+IS103+IS1A+IS1G+IS3
+
+# END ALGS HERE
 
 def find_seq_changes(original_seq,optimized_seq,target):        # Compares input and output sequences, and highlights which bases were changed to remove hotspots
     target=str(target)

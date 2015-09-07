@@ -1,5 +1,7 @@
 utils = require './utils'
 symbols = require './symbols'
+mixins = require 'coffeescript-mixins'
+mixins.bootstrap()
 
 CODON_LENGTH = 3
 
@@ -16,49 +18,96 @@ class Sequence
   clean: ->
     cst = @constructor
     cleaned = @seq.map((sym) ->
-      @err "non-IUPAC symbol: #{sym}" if cst.ValidIUPACSyms?.has sym
-      cst.TransformSyms?.get sym or sym).join ''
+      @err "non-IUPAC symbol: #{sym}" unless cst.ValidIUPACSyms[sym]
+      cst.TransformSyms[sym] or sym).join ''
     @fixEnds @check(cleaned), cst.FixEndOpts
   fixEnds: (strOrArr, opts) ->
-    { beg, end, doThrow } = opts
+    {beg, end, doThrow} = opts
     if beg
       activeStr = strOrArr[..(beg.len - 1)]
-      if not beg.text.has activeStr
+      if not beg.text[activeStr]
         @err "Error at beginning of sequence #{activeStr}" if doThrow
         strOrArr = beg + strOrArr
     if end
       activeStr = strOrArr[(-end.len)..]
-      if not end.text.has activeStr
+      if not end.text[activeStr]
         @err "Error at end of sequence #{activeStr}" if doThrow
         strOrArr = strOrArr + end
     strOrArr
 
 class AminoAcidSequence extends Sequence
-  @ValidIUPACSyms: new Set symbols.AminoIUPAC
-  @TransformSyms: new Map symbols.AminoTransform
+  @ValidIUPACSyms: symbols.AminoIUPAC
+  @TransformSyms: symbols.AminoTransform
   @FixEndOpts:
     beg:
       len: 1
-      text: new Set ['M']
+      text: ['M']
     end:
       len: 1
-      text: new Set ['-']
+      text: ['-']
+
+  # minimizeMutation: ->
+  #   @clean().map
+
+# TODO: consider using cached search tree or something if countOccurrences ends
+# up needing a bit more speed
+class Count
+  @WeightedPyrDimerMap: (->
+    dimers = utils.ConvoluteKeysValues symbols.WeightedPyrDimers
+    v = parseFloat v for k, v of dimers
+    dimers)()
+  countOccurrences: (containerSet, symbolSet) ->
+    symbolSet.map((el) -> containerSet.countSubstr el).sum()
+  splitCodons: (seq) ->
+    seq.splitLength CODON_LENGTH
+  rateLimitingCodons: (splitSeq) ->
+    splitSeq.filter((el) -> symbols.RateLimitingCodons[el]).length
+  antiShineDelgarno: (seq) ->
+    @countOccurrences seq, symbols.AntiShineDelgarno
+  ttDimerCount: (seq) ->
+    @countOccurrences seq, symbols.TTDimers
+  otherPyrDimerCount: (seq) ->
+    @countOccurrences seq, symbols.OtherPyrDimers
+  weightedPyrDimerCount: (seq) ->
+    total = 0
+    for k, v of @constructor.WeightedPyrDimerMap
+      total += seq.countSubstr k, v
+    total
+  methylationSites: (seq) ->
+    @countOccurrences seq, symbols.MethylationSites
+  repeatRuns: (seq) ->
+    totalRuns = 0
+    prevChar = null
+    curRun = 0
+    for ch in seq
+      if ch is prevChar then ++curRun else curRun = 0
+      if curRun is 4 then ++totalRuns
+      prevChar = ch
+    totalRuns
+  # TODO: WHAT IS THIS????
+  homologyRepeats: (seq) ->
+  deaminationSites: (seq) -> @countOccurrences seq, symbols.DeaminationSites
+  alkylationSites: (seq) -> @countOccurrences seq, symbols.AlkylationSites
+  oxidationSites: (seq) -> @countOccurrences seq, symbols.OxidationSites
+  miscSites: (seq) -> @countOccurrences seq, symbols.MiscSites
+  insertionSequences: (seq) -> @countOccurrences seq, symbols.InsertionSequences
 
 class DNASequence extends Sequence
-  @ValidIUPACSyms: new Set symbols.DNAIUPAC
-  @CodonAminoMap: new Map utils.ConvoluteKeysValues symbols.DNACodonAminoMap
-  @TransformSyms: new Map symbols.DNATransformSyms
+  @include Count
+  @ValidIUPACSyms: symbols.DNAIUPAC
+  @CodonAminoMap: utils.ConvoluteKeysValues symbols.DNACodonAminoMap
+  @TransformSyms: symbols.DNATransformSyms
 
-  @StartCodons: ['ATG']
-  @StopCodons: ['TGA', 'TAG', 'TAA']
+  @StartCodons: symbols.StartCodons
+  @StopCodons: symbols.StopCodons
 
   @FixEndOpts:
     beg:
       len: 3
-      text: new Set @constructor.StartCodons
+      text: @constructor.StartCodons
     end:
       len: 3
-      text: new Set @constructor.StopCodons
+      text: @constructor.StopCodons
     doThrow: on
 
   check: (seq) ->
@@ -69,6 +118,9 @@ class DNASequence extends Sequence
         @err "Premature stop codon #{codon} at index #{ind}"
     seq
 
+  toAminoSeqFromSplit: (splitSeq) ->
+    new AminoAcidSequence splitSeq.map (codon) ->
+      @constructor.CodonAminoMap[codon] or @err "codon #{codon} is invalid"
+
   toAminoSeq: ->
-    new AminoAcidSequence @clean().splitLength(CODON_LENGTH).map (codon) ->
-      @constructor.CodonAminoMap.get(codon) or @err "codon #{codon} is invalid"
+    @toAminoSeqFromSplit @splitCodons @clean()

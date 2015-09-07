@@ -1,9 +1,9 @@
 module.exports =
   AminoIUPAC: ['W','L','P','H','Q','R','I','M','T','N','K','S','V',
     'A','D','E','G','F','Y','C','-']
-  AminoTransform: [
+  AminoTransform:
     '*': '-'
-    'X': '-']
+    'X': '-'
 
   DNAIUPAC: ['A','T','G','C','U','R','Y','N']
   DNACodonAminoMap:
@@ -28,8 +28,8 @@ module.exports =
     'V': ['GTT', 'GTC', 'GTA', 'GTG']
     'W': ['TGG']
     'Y': ['TAT', 'TAC']
-  DNATransformSyms: [
-    'U': 'T']
+  DNATransformSyms:
+    'U': 'T'
 
   CodonUsage:
     'ATG': 1.00
@@ -96,3 +96,58 @@ module.exports =
     'TGA': 0.30
     'TAG': 0.09
     'TAA': 0.61
+
+  StartCodons: ['ATG']
+  StopCodons: ['TGA', 'TAG', 'TAA']
+
+  RateLimitingCodons: ['CTA', 'TAG', 'CGA', 'CGG', 'AGA', 'AGG', 'ATA']
+  AntiShineDelgarno: ['AGG', 'GGA', 'GAG', 'GGG', 'GGT', 'GTG']
+  TTDimers: ['TT', 'AA']
+  OtherPyrDimers: ['CT', 'TC', 'CC', 'CY', 'TY', 'YC', 'YT', 'YY', 'GA', 'AG',
+    'GG', 'AR', 'RA', 'GR', 'RG', 'RR']
+  WeightedPyrDimers:
+    '.581': ['TT', 'AA']
+    '.586': ['TC', 'GA']
+    '.104': ['CT', 'AG']
+    '.0111': ['CC', 'GG']
+  MethylationSites: ['GATC', 'CTAG', 'CCAGG', 'CCTGG', 'GGTCC', 'GGACC']
+  DeaminationSites: ['CG', 'GC']
+  AlkylationSites: ['GG', 'AG', 'TC', 'GA']
+  # TODO: WHY ARE THERE BOTH 'GGG'/'GG', 'CCC'/'CC'?
+  OxidationSites: ['GGG', 'GG', 'CCC', 'CC']
+  # TODO: WHY IS THE LAST ONE REPEATED?
+  MiscSites: ['TTG', 'CTG', 'GTGG', 'CCAC', 'GGCGCC', 'GGCGCC']
+  # TODO: Ns IN DNA???? HOW 2 ACCOUNT FOR?
+  HairpinSites: ['CCTCCGG', 'CCNNNGG', 'CGNNNCG', 'GCNNNGC', 'GGNNNCC']
+  InsertionSequences: [
+    # ISEc17
+    'TGCGGACGATCATCAGTTAT'
+    'ATAACTGATGATCGTCCGCA'
+    # IS903B
+    'GATCGTTGGGAACCG'
+    'CGGTTCCCAACGATC'
+    # IS50R
+    'GCAGTCAGGCACCGT'
+    'TAAGCTTTAATGCGC'
+    'GCAGTCAGGCACCGT'
+    'GCCGCCCAGTCCTGC'
+    # IS30
+    'AGTGCCATCTCCTT'
+    'AAGGAGATGGCACT'
+    # IS103
+    'TGTATCAGTGGGGCTTTG'
+    'CAAAGCCCCACTGATACA'
+    # IS1A
+    'TTGTGTTTTTCAT'
+    'ATGAAAAACACAA'
+    'GGCATACTCTGCGACATCGT'
+    'ACGATGTCGCAGAGTATGCC'
+    'CTTATGACATTAAAAGTAAC'
+    'TGAATAGCCTGTCTTACA'
+    'TAACTGTTTCTTTTTGTT'
+    # IS1G
+    'CAGTCAGG'
+    'CCTGACTG'
+    # IS3
+    'AAGTATATCA'
+    'TGATATACTT']

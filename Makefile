@@ -11,18 +11,14 @@ LESS_CC := $(NPM_BIN)/lessc
 UGLIFY_JS := $(NPM_BIN)/uglifyjs
 BROWSERIFY := $(NPM_BIN)/browserify
 CLEAN_CSS := $(NPM_BIN)/cleancss
-BABEL_CC := $(NPM_BIN)/babel
 MAKE_PIPE := $(NPM_BIN)/make-pipe
 
 COFFEE_OPTS := -bc --no-header
 UGLIFY_JS_OPTS := -mc --screw-ie8 2>/dev/null
-BABEL_OPTS := --optional runtime
 
 # external js
 REACT_JS := react
-BABEL_RUNTIME := babel-runtime
-BABEL_INTERNAL := core-js regenerator
-EXTERN_JS := $(REACT_JS) $(patsubst %,$(BABEL_RUNTIME)/%,$(BABEL_INTERNAL))
+EXTERN_JS := $(REACT_JS)
 
 # external css
 BOOTSTRAP := bootstrap
@@ -34,7 +30,7 @@ EXTERN_JS_PROOFS := $(patsubst %,$(NODE_DIR)/%,$(EXTERN_JS))
 EXTERN_CSS_PROOFS := $(patsubst %,$(NODE_DIR)/%,$(EXTERN_CSS))
 
 DEPS := $(CJSX_CC) $(LESS_CC) $(UGLIFY_JS) $(BROWSERIFY) $(CLEAN_CSS) \
-	$(COFFEE_CC) $(BABEL_CC) $(EXTERN_JS_PROOFS)
+	$(COFFEE_CC) $(EXTERN_JS_PROOFS)
 
 # input/output files
 # github pages sucks
@@ -42,12 +38,16 @@ SRC_DIR := .
 SCRIPTS_DIR := $(SRC_DIR)/scripts
 STYLES_DIR := $(SRC_DIR)/styles
 LIB_DIR := $(SRC_DIR)/lib
+BIOBRICK_DIR := $(SRC_DIR)/biobrick
 
 CJSX_IN := $(wildcard $(SCRIPTS_DIR)/*.cjsx)
 COFFEE_IN := $(wildcard $(SCRIPTS_DIR)/*.coffee) $(wildcard $(LIB_DIR)/*.coffee)
 JS_OUT := $(patsubst %.cjsx,%.js,$(CJSX_IN)) \
 	$(patsubst %.coffee,%.js,$(COFFEE_IN))
 JS_FINAL := $(SCRIPTS_DIR)/bundle.js
+
+BIOBRICK_IN := $(wildcard $(BIOBRICK_DIR)/*.coffee)
+BIOBRICK_OUT := $(patsubst %.coffee,%.js,$(BIOBRICK_IN))
 
 LESS_IN := $(wildcard $(STYLES_DIR)/*.less)
 CSS_OUT := $(patsubst %.less,%.css,$(LESS_IN))
@@ -58,25 +58,23 @@ BROWSERIFY_EXTERN_NOREQ := $(patsubst %,-x %,$(EXTERN_JS))
 BROWSERIFY_EXTERN_BUNDLE := $(SCRIPTS_DIR)/vendor.js
 
 # declarations
-TARGETS := $(JS_FINAL) $(CSS_OUT) $(BROWSERIFY_EXTERN_BUNDLE)
+TARGETS := $(JS_FINAL) $(CSS_OUT) $(BROWSERIFY_EXTERN_BUNDLE) $(BIOBRICK_OUT)
 
 all: $(TARGETS)
 
 $(JS_FINAL): $(JS_OUT) $(DEPS)
-	$(MAKE_PIPE) $(BROWSERIFY) -t babelify $(BROWSERIFY_EXTERN_NOREQ) \
-		$(JS_OUT) '|' $(UGLIFY_JS) $(UGLIFY_JS_OPTS) -o $@
+	$(MAKE_PIPE) $(BROWSERIFY) $(BROWSERIFY_EXTERN_NOREQ) $(JS_OUT) '|' \
+		$(UGLIFY_JS) $(UGLIFY_JS_OPTS) -o $@
 
 $(BROWSERIFY_EXTERN_BUNDLE): $(DEPS)
 	$(MAKE_PIPE) $(BROWSERIFY) $(BROWSERIFY_EXTERN_REQUIRE) '|' \
 		$(UGLIFY_JS) $(UGLIFY_JS_OPTS) -o $@
 
 %.js: %.coffee $(DEPS)
-	$(MAKE_PIPE) $(COFFEE_CC) $(COFFEE_OPTS) -p $< '|' $(BABEL_CC) \
-		$(BABEL_OPTS) -o $@
+	$(COFFEE_CC) $(COFFEE_OPTS) $<
 
 %.js: %.cjsx $(DEPS)
-	$(MAKE_PIPE) $(CJSX_CC) $(COFFEE_OPTS) -p $< '|' $(BABEL_CC) \
-		$(BABEL_OPTS) -o $@
+	$(CJSX_CC) $(COFFEE_OPTS) $<
 
 %.css: %.less $(DEPS)
 	$(MAKE_PIPE) $(LESS_CC) $< '|' $(CLEAN_CSS) -o $@
