@@ -17,12 +17,12 @@ module.exports =
     'H': ['CAT', 'CAC']
     'I': ['ATA', 'ATC', 'ATT']
     'K': ['AAA', 'AAG']
-    'L': ['CTT', 'CTC', 'TTA', 'TTG']
+    'L': ['CTT', 'CTC', 'CTA', 'CTA', 'TTA', 'TTG']
     'M': ['ATG']
     'N': ['AAT', 'AAC']
     'P': ['CCT', 'CCC', 'CCA', 'CCG']
     'Q': ['CAA', 'CAG']
-    'R': ['AGA', 'AGG', 'CGT', 'CGC', 'CGA', 'CGG']
+    'R': ['AGA', 'AGG', 'CGT', 'CGC', 'CGA', 'CGG', 'CTG']
     'S': ['AGT', 'AGC', 'TCT', 'TCC', 'TCA', 'TCG']
     'T': ['ACT', 'ACC', 'ACA', 'ACG']
     'V': ['GTT', 'GTC', 'GTA', 'GTG']
@@ -97,6 +97,9 @@ module.exports =
     'TAG': 0.09
     'TAA': 0.61
 
+  AminoStartCodons: ['M']
+  AminoEndCodons: ['-']
+
   StartCodons: ['ATG']
   StopCodons: ['TGA', 'TAG', 'TAA']
 
@@ -115,8 +118,12 @@ module.exports =
   AlkylationSites: ['GG', 'AG', 'TC', 'GA']
   OxidationSites: ['GGG', 'GG', 'CCC', 'CC']
   MiscSites: ['TTG', 'CTG', 'GTGG', 'CCAC', 'GGCGCC']
-  # TODO: Ns IN DNA???? HOW 2 ACCOUNT FOR?
-  HairpinSites: ['CCTCCGG', 'CCNNNGG', 'CGNNNCG', 'GCNNNGC', 'GGNNNCC']
+  HairpinSites: [
+    /CCTCCGG/g
+    /CC...GG/g # . basically means N
+    /CG...CG/g
+    /GC...GC/g
+    /GG...CC/g]
   InsertionSequences: [
     # ISEc17
     'TGCGGACGATCATCAGTTAT'
