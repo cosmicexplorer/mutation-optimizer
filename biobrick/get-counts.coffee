@@ -58,5 +58,5 @@ fs.readFile '../biobrick/out-file-seqs.json', (err, data) ->
   #{JSON.stringify makeLogFromPart firstDNAPart}\n"
   dnaCheckParts[1..].forEach (part) ->
     dnaCheckStream.write ",\"#{part}\":
-    #{JSON.stringify makeLogFromPart part}"
+    #{JSON.stringify makeLogFromPart part}\n"
   dnaCheckStream.write '}\n'
