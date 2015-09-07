@@ -15,7 +15,8 @@ getCSVString = (counts) ->
 fs.readFile 'out-counts-amino.json', (err, data) ->
   throw err if err
   AminoCounts = JSON.parse data.toString()
-  sums = getSums AminoCounts
+  sums = JSON.parse JSON.stringify getSums AminoCounts
+  sums.howManyParts = Object.keys(AminoCounts).length
   fs.writeFile 'total-counts-amino.json', (JSON.stringify sums), (err) ->
     throw err if err
   fs.writeFile 'amino-counts.csv', (getCSVString AminoCounts), (err) ->
@@ -24,7 +25,8 @@ fs.readFile 'out-counts-amino.json', (err, data) ->
 fs.readFile 'out-counts-dna.json', (err, data) ->
   throw err if err
   DNACounts = JSON.parse data.toString()
-  sums = getSums DNACounts
+  sums = JSON.parse JSON.stringify getSums DNACounts
+  sums.howManyParts = Object.keys(DNACounts).length
   fs.writeFile 'total-counts-dna.json', (JSON.stringify sums), (err) ->
     throw err if err
   fs.writeFile 'dna-counts.csv', (getCSVString DNACounts), (err) ->
