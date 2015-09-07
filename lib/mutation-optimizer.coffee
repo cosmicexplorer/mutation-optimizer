@@ -43,6 +43,8 @@ class Sequence
     #     strOrArr = strOrArr + end[0]
     # strOrArr
 
+ORF_THRESHOLD = 100
+
 class AminoAcidSequence extends Sequence
   @ValidIUPACSyms: symbols.AminoIUPAC
   @TransformSyms: symbols.AminoTransform
@@ -72,8 +74,8 @@ class AminoAcidSequence extends Sequence
       dist = getDist indexB
       if dist > prev then dist
     biggestPossibleORF = @findPossibleORFs(seq).reduce(getMaxDist, 0)
-    if 0 < biggestPossibleORF < 20
-      @err "orf of length >= 20 not found by heuristic"
+    if biggestPossibleORF < ORF_THRESHOLD
+      @err "orf of length >= #{ORF_THRESHOLD} not found by heuristic"
     seq
 
   # minimizeMutation: ->
@@ -98,7 +100,7 @@ class Count
   @rateLimitingCodons: (splitSeq) ->
     splitSeq.filter((el) ->
       symbols.RateLimitingCodons.indexOf(el) isnt -1).length
-  # FIXME: DIFFERS FROM PY AT ds[0]
+  # DIFFERS FROM PY AT ds[0] because of indexing
   @antiShineDelgarno: (seq) ->
     @countOccurrences seq, symbols.AntiShineDelgarno
   @ttDimerCount: (seq) ->
@@ -119,11 +121,11 @@ class Count
       prevChar = ch
     totalRuns
   @deaminationSites: (seq) -> @countOccurrences seq, symbols.DeaminationSites
-  # FIXME: DIFFERS FROM PY AT ds[0]
+  # DIFFERS FROM PY AT ds[0] because of indexing
   @alkylationSites: (seq) -> @countOccurrences seq, symbols.AlkylationSites
   @oxidationSites: (seq) -> @countOccurrences seq, symbols.OxidationSites
   @miscSites: (seq) -> @countOccurrences seq, symbols.MiscSites
-  # FIXME: DIFFERS FROM PY AT ds[0]
+  # DIFFERS FROM PY AT ds[0] because of indexing
   @hairpinSites: (seq) ->
     symbols.HairpinSites.map((reg) -> (seq.match(reg) or []).length).sum()
   @insertionSequences: (seq) ->
