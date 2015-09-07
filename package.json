@@ -18,12 +18,12 @@
     "uglify-js": "^2.4.23"
   },
   "dependencies": {
+    "async": "^1.4.2",
     "cheerio": "^0.19.0",
     "coffeescript-mixins": "0.0.4",
     "dump-stream": "0.0.7",
     "lodash": "^3.10.1",
     "react": "^0.13.3",
-    "rwlock": "^5.0.0",
     "xml-stream": "^0.4.5"
   }
 }

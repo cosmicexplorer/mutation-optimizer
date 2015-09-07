@@ -8,6 +8,18 @@ CODON_LENGTH = 3
 class SequenceError
   constructor: (@message, @type) ->
 
+### SEQ CHECK IMPROVEMENTS
+- make orf finder, and only act upon each orf in sequence, not sequence as a
+whole since sequence may not begin/end on orf boundary
+- check if there appears to be at least one orf >= 20 bases in length
+
+- get at least 2-3k valid seqs for counting; if not, then attempt to apply above
+
+DO THIS!!!:
+- only check amino-converted seqs (?)
+  - look at change just made to python file in aa_seq_check
+###
+
 class Sequence
   err: (str) -> throw new SequenceError str, @constructor.name
   check: (seq) -> seq
@@ -45,13 +57,19 @@ class AminoAcidSequence extends Sequence
     end:
       len: 1
       text: ['-']
+  check: (seq) ->
+    # TODO: MAKE SEQ A STRING
+    @err "orf of length >= 20 not found by heuristic" if seq.indexOf '-' < 20
 
   # minimizeMutation: ->
   #   @clean().map
 
 # TODO: consider using cached search tree or something if countOccurrences ends
 # up needing a bit more speed
+# TODO: reverse complement all of these
+# TODO: homology repeats once mutation-optimization implemented
 class Count
+  # all sequences here must be strings!!!
   @WeightedPyrDimerMap: (->
     dimers = utils.ConvoluteKeysValues symbols.WeightedPyrDimers
     v = parseFloat v for k, v of dimers
@@ -84,8 +102,6 @@ class Count
       if curRun is 4 then ++totalRuns
       prevChar = ch
     totalRuns
-  # TODO: WHAT IS THIS????
-  homologyRepeats: (seq) ->
   deaminationSites: (seq) -> @countOccurrences seq, symbols.DeaminationSites
   alkylationSites: (seq) -> @countOccurrences seq, symbols.AlkylationSites
   oxidationSites: (seq) -> @countOccurrences seq, symbols.OxidationSites

@@ -113,10 +113,8 @@ module.exports =
   MethylationSites: ['GATC', 'CTAG', 'CCAGG', 'CCTGG', 'GGTCC', 'GGACC']
   DeaminationSites: ['CG', 'GC']
   AlkylationSites: ['GG', 'AG', 'TC', 'GA']
-  # TODO: WHY ARE THERE BOTH 'GGG'/'GG', 'CCC'/'CC'?
   OxidationSites: ['GGG', 'GG', 'CCC', 'CC']
-  # TODO: WHY IS THE LAST ONE REPEATED?
-  MiscSites: ['TTG', 'CTG', 'GTGG', 'CCAC', 'GGCGCC', 'GGCGCC']
+  MiscSites: ['TTG', 'CTG', 'GTGG', 'CCAC', 'GGCGCC']
   # TODO: Ns IN DNA???? HOW 2 ACCOUNT FOR?
   HairpinSites: ['CCTCCGG', 'CCNNNGG', 'CGNNNCG', 'GCNNNGC', 'GGNNNCC']
   InsertionSequences: [

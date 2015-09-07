@@ -1,20 +1,31 @@
-_ = require 'lodash'
 fs = require 'fs'
-rwlock = require 'rwlock'
+stream = require 'stream'
+
+async = require 'async'
 
 biobrick = require './biobrick'
-mutOpt = require '../lib/mutation-optimizer'
 
-lock = new rwlock
+TASK_LIM = 50
 
-# run this through the seq checker!!!
+counter = 0
+
 fs.readFile 'out-file-cleaned', (err, data) ->
   throw err if err
-  _.uniq(JSON.parse(data.toString())).map (bb) ->
-     biobrick.getPartSeq bb, (seq) ->
-       counts = mutOpt.counts seq
-       line = JSON.stringify {"#{bb}": counts}
-       lock.writeLock (release) ->
-         fs.appendFile 'out-file-seq-data.yaml', line, (err) ->
-           throw err if err
-           release()
+  partNums = JSON.parse data.toString()
+  arrLen = partNums.length
+  inStream = new stream.PassThrough
+  queue = async.queue (part, cb) ->
+    biobrick.getPartSeq part, (seq) ->
+      line = "\"#{part}\": #{JSON.stringify seq}\n"
+      pct = (Math.round ++counter / arrLen * 100 * 100)
+      pct = pct / 100
+      console.log "about #{counter} / #{arrLen} (#{pct}%) downloaded"
+      inStream.write line
+      cb()
+  inStream.pipe fs.createWriteStream 'out-file-seqs.json'
+  inStream.write '{\n'
+  queue.empty = ->
+    inStream.write '}'
+    console.log "DONE!"
+  queue.concurrency = TASK_LIM
+  queue.push partNums

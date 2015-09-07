@@ -46,10 +46,21 @@ scrapePartsFromPgroupPage = (urls, cb, arr) ->
 #   scrapePartsFromPgroupPage urls.map(transformTableManagementToPartsDb),
 #     console.log
 
+retryTime = 200
+
 getPartSeq = (name, cb) ->
-  http.get "http://parts.igem.org/cgi/xml/part.cgi?part=#{name}", (resp) ->
-    new XmlStream(resp).on 'updateElement: seq_data', (seq) ->
-      cb seq.$text.replace /\s/, ""
+  http.get("http://parts.igem.org/cgi/xml/part.cgi?part=#{name}", (resp) ->
+    partStream = new XmlStream resp
+    partStream.collect 'seq_data'
+    partStream.on 'endElement: sequences', (seqArr) ->
+      cb seqArr['seq_data'].map (seq) -> seq.toUpperCase().replace /\s/g, ""
+    # discard ones with invalid xml
+    partStream.on 'error', (err) ->
+      console.error "xml parse error #{err.message} from part #{name},
+      not retrying").on 'error', (err) ->
+        console.error "connection error #{err.message} from part #{name},
+        retrying in #{retryTime} ms"
+        setTimeout (-> getPartSeq name, cb), retryTime
 
 # name = 'BBa_B0034'
 # getPartSeq name, (seq) ->
