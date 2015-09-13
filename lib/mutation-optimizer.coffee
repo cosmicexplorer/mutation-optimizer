@@ -1,7 +1,5 @@
 utils = require './utils'
 symbols = require './symbols'
-mixins = require 'coffeescript-mixins'
-mixins.bootstrap()
 
 CODON_LENGTH = 3
 
@@ -30,6 +28,7 @@ class Sequence
       cst.TransformSyms[sym] or sym).join ''
     @fixEnds @check(cleaned), cst.FixEndOpts
   fixEnds: (strOrArr, opts) -> strOrArr
+    # TODO: fix/reinstate this
     # {beg, end, doThrow} = opts
     # if beg
     #   activeStr = strOrArr[..(beg.len - 1)]
@@ -132,7 +131,6 @@ class Count
     @countOccurrences seq, symbols.InsertionSequences
 
 class DNASequence extends Sequence
-  @include Count
   @ValidIUPACSyms: symbols.DNAIUPAC
   @CodonAminoMap: utils.ConvoluteKeysValues symbols.DNACodonAminoMap
   @TransformSyms: symbols.DNATransformSyms

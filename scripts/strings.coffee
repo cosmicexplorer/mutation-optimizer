@@ -8,7 +8,7 @@ module.exports =
   SpeciesToSearch: [
     'E. Coli'
     'idk yeast maybe?'
-    'E. Coli'
+    'Francis Crick'
     'E. Coli'
     'E. Coli'
     'E. Coli'

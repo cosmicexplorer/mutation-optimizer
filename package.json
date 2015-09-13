@@ -20,7 +20,6 @@
   "dependencies": {
     "async": "^1.4.2",
     "cheerio": "^0.19.0",
-    "coffeescript-mixins": "0.0.4",
     "dump-stream": "0.0.7",
     "lodash": "^3.10.1",
     "react": "^0.13.3",
