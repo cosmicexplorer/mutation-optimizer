@@ -10,8 +10,7 @@ fs.readFile '../biobrick/out-file-seqs.json', (err, data) ->
   makeLogFromPart = (part) ->
     # take only the first from sequences
     seq = seqs[part][0]
-    splitSeq = Count.splitCodons seq
-    rateLimitingCodons: Count.rateLimitingCodons splitSeq
+    rateLimitingCodons: Count.rateLimitingCodons seq
     antiShineDelgarno: Count.antiShineDelgarno seq
     ttDimerCount: Count.ttDimerCount seq
     otherPyrDimerCount: Count.otherPyrDimerCount seq

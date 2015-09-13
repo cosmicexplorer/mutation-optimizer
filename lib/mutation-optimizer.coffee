@@ -96,8 +96,8 @@ class Count
   @splitCodons: (seq) ->
     seq.splitLength CODON_LENGTH
   # counts ensue
-  @rateLimitingCodons: (splitSeq) ->
-    splitSeq.filter((el) ->
+  @rateLimitingCodons: (seq) ->
+    @splitCodons(seq).filter((el) ->
       symbols.RateLimitingCodons.indexOf(el) isnt -1).length
   # DIFFERS FROM PY AT ds[0] because of indexing
   @antiShineDelgarno: (seq) ->
