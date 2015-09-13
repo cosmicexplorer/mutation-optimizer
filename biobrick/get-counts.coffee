@@ -8,7 +8,9 @@ fs.readFile '../biobrick/out-file-seqs.json', (err, data) ->
   seqs = JSON.parse data.toString()
   seqKeys = Object.keys seqs
   makeLogFromPart = (part) ->
-    # take only the first from sequences
+    # take only the first from sequences (although we haven't found any part
+    # which has more than one sequence, even though the xml admits the
+    # possibility)
     seq = seqs[part][0]
     rateLimitingCodons: Count.rateLimitingCodons seq
     antiShineDelgarno: Count.antiShineDelgarno seq
