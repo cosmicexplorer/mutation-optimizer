@@ -80,6 +80,8 @@ class AminoAcidSequence extends Sequence
   # minimizeMutation: ->
   #   @clean().map
 
+DefaultHomologyCount = 5
+
 # TODO: consider using cached search tree or something if countOccurrences ends
 # up needing a bit more speed
 # TODO: reverse complement all of these from symbols instead of using them
@@ -119,6 +121,12 @@ class Count
       if curRun >= 3 then ++totalRuns
       prevChar = ch
     totalRuns
+  # TODO: find more meaningful representation of this, also optimize
+  @homologyRepeatCount: (seq, count = DefaultHomologyCount) ->
+    numRepeats = 0
+    for i in [0..(seq.length - count)] by 1
+      ++numRepeats if seq.indexOf seq[i..(i + count)] isnt -1
+    numRepeats
   @deaminationSites: (seq) -> @countOccurrences seq, symbols.DeaminationSites
   # DIFFERS FROM PY AT ds[0] because of indexing
   @alkylationSites: (seq) -> @countOccurrences seq, symbols.AlkylationSites
