@@ -27,24 +27,24 @@ class Sequence
         @err "non-IUPAC symbol: #{sym}"
       cst.TransformSyms[sym] or sym).join ''
     @fixEnds @check(cleaned), cst.FixEndOpts
-  fixEnds: (strOrArr, opts) -> strOrArr
+  fixEnds: (strOrArr, opts) ->
     # TODO: fix/reinstate this
-    # {beg, end, doThrow} = opts
-    # if beg
-    #   activeStr = strOrArr[..(beg.len - 1)]
-    #   if beg.text.indexOf(activeStr) is -1
-    #     @err "Error at beginning of sequence #{activeStr}" if doThrow
-    #     strOrArr = beg[0] + strOrArr
-    # if end
-    #   activeStr = strOrArr[(-end.len)..]
-    #   if end.text.indexOf(activeStr) is -1
-    #     @err "Error at end of sequence #{activeStr}" if doThrow
-    #     strOrArr = strOrArr + end[0]
-    # strOrArr
+    {beg, end, doThrow} = opts
+    if beg
+      activeStr = strOrArr[..(beg.len - 1)]
+      if beg.text.indexOf(activeStr) is -1
+        @err "Error at beginning of sequence #{activeStr}" if doThrow
+        strOrArr = beg[0] + strOrArr
+    if end
+      activeStr = strOrArr[(-end.len)..]
+      if end.text.indexOf(activeStr) is -1
+        @err "Error at end of sequence #{activeStr}" if doThrow
+        strOrArr = strOrArr + end[0]
+    strOrArr
 
 ORF_THRESHOLD = 100
 
-add = (a, b) -> a + b
+getMinCount = (a, b) -> if a.count < b.count then a else b
 
 class AminoAcidSequence extends Sequence
   @ValidIUPACSyms: symbols.AminoIUPAC
@@ -79,11 +79,28 @@ class AminoAcidSequence extends Sequence
       @err "orf of length >= #{ORF_THRESHOLD} not found by heuristic"
     seq
 
+  @MutationWindowLength: 3
   minimizeMutation: ->
-    codonChoices = @clean().split('').map (amino) ->
-      symbols.DNACodonAminoMap[amino]
-    # do windows
-    scores = Count.CountFuns.map((w) -> w.func(seq) * w.weight).reduce add
+    aminoString = @clean().split('')
+    finalString = new Array aminoString.length
+    # TODO: consider version where we greedily choose current index of codon
+    # based on sum of weights of all codon combinations it's contained in,
+    # instead of just the codon combination with the least weight
+    for i in [0..(aminoString.length - @constructor.MutationWindowLength)] by 1
+      finalString[i] = aminoString[i..(i + @constructor.MutationWindowLength)]
+        .map((el) -> symbols.DNACodonAminoMap[el])
+        .getAllCombinations()
+        .map((codonSeq) ->
+          first: codonSeq[0]
+          score: Count.AllFuns.map((w) ->
+            w.func(codonSeq.join '') * w.weight).sum())
+        .reduce(getMinCount)
+        .first
+    lastFewCodonsIndex = aminoString.length -
+      (@constructor.MutationWindowLength + 1)
+    for i in [(lastFewCodonsIndex)..(aminoString.length - 1)] by 1
+      finalString[i] = aminoString[i]
+    new DNASequence finalString.join ''
 
 # TODO: consider using cached search tree or something if countOccurrences ends
 # up needing a bit more speed
@@ -99,24 +116,22 @@ class Count
     dimers)()
   @countOccurrences: (containerSet, symbolSet) ->
     symbolSet.map((el) -> containerSet.countSubstr el).sum()
-  @splitCodons: (seq) ->
-    seq.splitLength CODON_LENGTH
+  @splitCodons: (seq) -> seq.splitLength CODON_LENGTH
   # counts ensue
-  @rateLimitingCodons: (seq) ->
-    @splitCodons(seq).filter((el) ->
-      symbols.RateLimitingCodons.indexOf(el) isnt -1).length
+  @rateLimitingCodons: (seq) => @splitCodons(seq).filter((el) ->
+    symbols.RateLimitingCodons.indexOf(el) isnt -1).length
   # DIFFERS FROM PY AT ds[0] because of indexing
-  @antiShineDelgarno: (seq) ->
+  @antiShineDelgarno: (seq) =>
     @countOccurrences seq, symbols.AntiShineDelgarno
-  @ttDimerCount: (seq) ->
+  @ttDimerCount: (seq) =>
     @countOccurrences seq, symbols.TTDimers
-  @otherPyrDimerCount: (seq) ->
+  @otherPyrDimerCount: (seq) =>
     @countOccurrences seq, symbols.OtherPyrDimers
-  @weightedPyrDimerCount: (seq) ->
+  @weightedPyrDimerCount: (seq) =>
     (v * seq.countSubstr k for k, v of @WeightedPyrDimerMap).sum()
-  @methylationSites: (seq) ->
+  @methylationSites: (seq) =>
     @countOccurrences seq, symbols.MethylationSites
-  @repeatRuns: (seq) ->
+  @repeatRuns: (seq) =>
     totalRuns = 0
     prevChar = null
     curRun = 0
@@ -126,23 +141,23 @@ class Count
       prevChar = ch
     totalRuns
   # TODO: find more meaningful representation of this, also optimize
-  @homologyRepeatCount: (seq, count = @DefaultHomologyCount) ->
+  @homologyRepeatCount: (seq, count = @DefaultHomologyCount) =>
     numRepeats = 0
     for i in [0..(seq.length - count)] by 1
       ++numRepeats if seq.indexOf seq[i..(i + count)] isnt -1
     numRepeats
-  @deaminationSites: (seq) -> @countOccurrences seq, symbols.DeaminationSites
+  @deaminationSites: (seq) => @countOccurrences seq, symbols.DeaminationSites
   # DIFFERS FROM PY AT ds[0] because of indexing
-  @alkylationSites: (seq) -> @countOccurrences seq, symbols.AlkylationSites
-  @oxidationSites: (seq) -> @countOccurrences seq, symbols.OxidationSites
-  @miscSites: (seq) -> @countOccurrences seq, symbols.MiscSites
+  @alkylationSites: (seq) => @countOccurrences seq, symbols.AlkylationSites
+  @oxidationSites: (seq) => @countOccurrences seq, symbols.OxidationSites
+  @miscSites: (seq) => @countOccurrences seq, symbols.MiscSites
   # DIFFERS FROM PY AT ds[0] because of indexing
-  @hairpinSites: (seq) ->
+  @hairpinSites: (seq) =>
     symbols.HairpinSites.map((reg) -> (seq.match(reg) or []).length).sum()
-  @insertionSequences: (seq) ->
+  @insertionSequences: (seq) =>
     @countOccurrences seq, symbols.InsertionSequences
-  @RFC10Sites: (seq) -> @countOccurrences seq, symbols.RFC10Sites
-  @CountFuns: for k, v of symbols.FunctionWeights
+  @RFC10Sites: (seq) => @countOccurrences seq, symbols.RFC10Sites
+  @AllFuns: for k, v of symbols.FunctionWeights
       func: @[k]
       weight: v
 
