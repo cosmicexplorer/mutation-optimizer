@@ -1534,12 +1534,13 @@ print('Number of anti-SD: Original {0} Optimized {1}'.format(calculated_antiSD[0
 calculated_misc_other=[(hairpin_sites(inp_seq)+insertion_sequences(inp_seq)+deamination_sites(inp_seq)+misc_other_sites(inp_seq)),(hairpin_sites(opt_seq)+insertion_sequences(opt_seq)+deamination_sites(opt_seq)+misc_other_sites(opt_seq))]
 print('Number miscellaneous other sites: Original {0} Optimized {1}'.format(calculated_misc_other[0],calculated_misc_other[1]))
 '''
-dna_seq='ATG'
-print('Sequence bp length: ',len(dna_seq))
-print('Weighted Pyr Dimer: ',weighted_pyr_dimer_count(dna_seq))
-print('Oxidation sites: ',oxidation_sites(dna_seq))
-print('Alkylation sites: ',alkylation_sites(dna_seq))
-print('Repeat runs: ',repeat_runs(dna_seq))
-print('5+ bp Homologies: ',homology_repeat_count(dna_seq))
-print('Deamination sites: ',deamination_sites(dna_seq))
-print('Misc other sites: ',misc_other_sites(dna_seq))
+if __name__ == "__main__":
+    dna_seq='ATG'
+    print('Sequence bp length: ',len(dna_seq))
+    print('Weighted Pyr Dimer: ',weighted_pyr_dimer_count(dna_seq))
+    print('Oxidation sites: ',oxidation_sites(dna_seq))
+    print('Alkylation sites: ',alkylation_sites(dna_seq))
+    print('Repeat runs: ',repeat_runs(dna_seq))
+    print('5+ bp Homologies: ',homology_repeat_count(dna_seq))
+    print('Deamination sites: ',deamination_sites(dna_seq))
+    print('Misc other sites: ',misc_other_sites(dna_seq))
