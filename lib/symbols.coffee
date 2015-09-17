@@ -156,3 +156,23 @@ module.exports =
     # IS3
     'AAGTATATCA'
     'TGATATACTT']
+  RFC10Sites: [
+    'GAATTC'
+    'TCTAGA'
+    'ACTAGT'
+    'CTGCAG']
+
+  # TODO: add otherPyrDimerCount!
+  FunctionWeights:
+    'rateLimitingCodons': 1000
+    'weightedPyrDimerCount': 3
+    'miscSites': .5
+    'hairpinSites': 2
+    'insertionSequences': 8
+    'antiShineDelgarno': 5
+    'deaminationSites': 1
+    'repeatRuns': 5
+    'homologyRepeatCount': .5
+    'alkylationSites': 1
+    'oxidationSites': 3
+    'RFC10Sites': 1000

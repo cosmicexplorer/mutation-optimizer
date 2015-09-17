@@ -44,6 +44,8 @@ class Sequence
 
 ORF_THRESHOLD = 100
 
+add = (a, b) -> a + b
+
 class AminoAcidSequence extends Sequence
   @ValidIUPACSyms: symbols.AminoIUPAC
   @TransformSyms: symbols.AminoTransform
@@ -77,10 +79,11 @@ class AminoAcidSequence extends Sequence
       @err "orf of length >= #{ORF_THRESHOLD} not found by heuristic"
     seq
 
-  # minimizeMutation: ->
-  #   @clean().map
-
-DefaultHomologyCount = 5
+  minimizeMutation: ->
+    codonChoices = @clean().split('').map (amino) ->
+      symbols.DNACodonAminoMap[amino]
+    # do windows
+    scores = Count.CountFuns.map((w) -> w.func(seq) * w.weight).reduce add
 
 # TODO: consider using cached search tree or something if countOccurrences ends
 # up needing a bit more speed
@@ -88,6 +91,7 @@ DefaultHomologyCount = 5
 # directly
 # TODO: add homology repeats once mutation-optimization implemented
 class Count
+  @DefaultHomologyCount: 5
   # all sequences here are assumed to be strings!!!
   @WeightedPyrDimerMap: (->
     dimers = utils.ConvoluteKeysValues symbols.WeightedPyrDimers
@@ -122,7 +126,7 @@ class Count
       prevChar = ch
     totalRuns
   # TODO: find more meaningful representation of this, also optimize
-  @homologyRepeatCount: (seq, count = DefaultHomologyCount) ->
+  @homologyRepeatCount: (seq, count = @DefaultHomologyCount) ->
     numRepeats = 0
     for i in [0..(seq.length - count)] by 1
       ++numRepeats if seq.indexOf seq[i..(i + count)] isnt -1
@@ -137,6 +141,10 @@ class Count
     symbols.HairpinSites.map((reg) -> (seq.match(reg) or []).length).sum()
   @insertionSequences: (seq) ->
     @countOccurrences seq, symbols.InsertionSequences
+  @RFC10Sites: (seq) -> @countOccurrences seq, symbols.RFC10Sites
+  @CountFuns: for k, v of symbols.FunctionWeights
+      func: @[k]
+      weight: v
 
 class DNASequence extends Sequence
   @ValidIUPACSyms: symbols.DNAIUPAC
