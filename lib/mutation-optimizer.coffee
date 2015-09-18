@@ -158,8 +158,8 @@ class Count
     @countOccurrences seq, symbols.InsertionSequences
   @RFC10Sites: (seq) => @countOccurrences seq, symbols.RFC10Sites
   @AllFuns: for k, v of symbols.FunctionWeights
-      func: @[k]
-      weight: v
+      func: @[v.func]
+      weight: v.weight
 
 class DNASequence extends Sequence
   @ValidIUPACSyms: symbols.DNAIUPAC

@@ -162,17 +162,40 @@ module.exports =
     'ACTAGT'
     'CTGCAG']
 
-  # TODO: add otherPyrDimerCount!
   FunctionWeights:
-    'rateLimitingCodons': 1000
-    'weightedPyrDimerCount': 3
-    'miscSites': .5
-    'hairpinSites': 2
-    'insertionSequences': 8
-    'antiShineDelgarno': 5
-    'deaminationSites': 1
-    'repeatRuns': 5
-    'homologyRepeatCount': .5
-    'alkylationSites': 1
-    'oxidationSites': 3
-    'RFC10Sites': 1000
+    'Rate Limiting Codons':
+      func: 'rateLimitingCodons'
+      weight: 1000
+    'Weighted Pyr Dimers':
+      func: 'weightedPyrDimerCount'
+      weight: 3
+    'Misc Sites':
+      func: 'miscSites'
+      weight: .5
+    'Hairpin Sites':
+      func: 'hairpinSites'
+      weight: 2
+    'Insertion Sequences':
+      func: 'insertionSequences'
+      weight: 8
+    'Anti-Shine Delgarno':
+      func: 'antiShineDelgarno'
+      weight: 5
+    'Deaminations':
+      func: 'deaminationSites'
+      weight: 1
+    'Repeat Runs':
+      func: 'repeatRuns'
+      weight: 5
+    'Homologous Repeats':
+      func: 'homologyRepeatCount'
+      weight: .5
+    'Alkylation':
+      func: 'alkylationSites'
+      weight: 1
+    'Oxidation':
+      func: 'oxidationSites'
+      weight: 3
+    'RFC10':
+      func: 'RFC10Sites'
+      weight: 1000

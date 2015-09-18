@@ -1,6 +1,7 @@
 React = require 'react'
 gensym = require './gensym'
 S = require './strings'
+utils = require '../lib/utils'
 
 
 ### searchable list ###
@@ -161,7 +162,7 @@ AdvancedOptions = React.createClass
   render: ->
     <div>
       <label className="spaced">{@props.labelText}</label>
-      <div className='option-pane short-object'>
+      <div className='option-pane'>
         {@props.children}
       </div>
     </div>
@@ -172,7 +173,7 @@ OptionsBox = React.createClass
   getInitialState: ->
     disabled: @props.disabled
   render: ->
-    <div className="options-box">
+    <div className="options-box row">
       {
         React.Children.map @props.children, (child) =>
           React.cloneElement child, disabled: @props.disabled
@@ -217,6 +218,8 @@ DisableableItem = React.createClass
     </AdvancedOptions>
 
 
+AdvancedOptionsPerLine = 2
+WeightedOptionsPerLine = 6
 ### integration ###
 MutationOptimizerApp = React.createClass
   getInitialState: ->
@@ -276,17 +279,25 @@ MutationOptimizerApp = React.createClass
           </div>
         </div>
         <div className="row">
-          <div className="col-md-2">
+          <div className="col-md-2 more-padding">
             <AdvancedOptions labelText={S.AdvancedOptionsHeading}>
             {
-              for key, val of @state.advancedOptions
-                <CheckboxWithContext key={key} heading={key}
-                  fn={((e) => (checked) =>
-                    newOptions = @state.advancedOptions
-                    newOptions[e] = checked
-                    @setState advancedOptions: newOptions)(key)}>
-                  <p className="explanation-text">{S.AdvancedOptions[key]}</p>
-                </CheckboxWithContext>
+              ([key, val] for key, val of @state.advancedOptions)
+                .splitLength(AdvancedOptionsPerLine).map (optionsArr, ind) =>
+                  <div className="row" key={ind}>
+                    {
+                      optionsArr.map ([key, val]) =>
+                        <CheckboxWithContext key={key} heading={key}
+                          fn={((e) => (checked) =>
+                            newOptions = @state.advancedOptions
+                            newOptions[e] = checked
+                            @setState advancedOptions: newOptions)(key)}>
+                          <p className="explanation-text">
+                            {S.AdvancedOptions[key]}
+                          </p>
+                        </CheckboxWithContext>
+                    }
+                  </div>
             }
             </AdvancedOptions>
           </div>
@@ -294,18 +305,24 @@ MutationOptimizerApp = React.createClass
             <DisableableItem heading={S.DefaultParamLabel}
               fn={(checked) => @setState isDefaultChecked: checked}
               labelText={S.ParameterOptionsHeading}>
-              <OptionsBox>
-                {
-                  for key, val of @state.parameterizedOptions
-                    <ParameterizedOption key={key} text={key}
-                      fn={((e) => (value) =>
-                        newOptions = @state.parameterizedOptions
-                        newOptions[e] = value
-                        @setState parameterizedOptions: newOptions)(key)}
-                      initialInput={val}
-                      isDisabled=false />
-                }
-              </OptionsBox>
+              {
+                ([key, val] for key, val of @state.parameterizedOptions)
+                  .splitLength(WeightedOptionsPerLine)
+                  .map (optionsArr, ind) =>
+                    <OptionsBox key={ind}>
+                      {
+                        optionsArr.map ([key, val]) =>
+                          <ParameterizedOption key={key} text={key}
+                            fn={((e) => (value) =>
+                              newOptions = @state.parameterizedOptions
+                              newOptions[e] = value
+                              @setState(parameterizedOptions: newOptions)
+                              )(key)}
+                            initialInput={val}
+                            isDisabled=false />
+                      }
+                    </OptionsBox>
+              }
             </DisableableItem>
           </div>
         </div>

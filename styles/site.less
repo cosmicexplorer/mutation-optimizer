@@ -7,8 +7,12 @@ body {
 }
 
 @generic-dark-color: #333;
-@smarty-font: "Helvetica Neue",Helvetica,Arial,sans-serif;
-label, p {
+@smarty-font: "Helvetica Neue",
+Helvetica,
+Arial,
+sans-serif;
+label,
+p {
   color: @generic-dark-color;
   font-family: @smarty-font;
 }
@@ -64,7 +68,8 @@ nav.navbar.navbar-default {
 }
 
 // outlines are tacky
-a, button {
+a,
+button {
   outline: none !important;
 }
 
@@ -119,6 +124,9 @@ a, button {
     .panel-heading {
       display: flex;
       justify-content: space-between;
+      & > p {
+        width: 70%;
+      }
       .btn-group button {
         width: @big-button-width;
       }
@@ -132,25 +140,34 @@ a, button {
   }
 }
 
+.more-padding {
+  padding-left: 30px;
+  padding-right: 25px;
+}
+
 @top-button-gradient: white;
 @bottom-button-gradient: rgba(226, 226, 226, .3);
 .option-pane {
   background-color: transparent;
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
+  flex-direction: column;
   border-radius: @standard-border-radius;
-  .option-box {
-    height: 100%;
-    border: 1px solid #d7dada;
-    border-radius: @standard-border-radius;
-    padding: 10px 10px 10px 10px;
-    background-image: linear-gradient(
-      to bottom, @top-button-gradient, @bottom-button-gradient);
-    // flex props
-    flex-grow: 1;
+  .row {
+    flex-direction: row;
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
+    padding-bottom: 10px;
+  }
+  .option-box {
+      height: 100%;
+      border: 1px solid #d7dada;
+      border-radius: @standard-border-radius;
+      padding: 10px 10px 10px 10px;
+      background-image: linear-gradient( to bottom, @top-button-gradient, @bottom-button-gradient);
+      // flex props
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
   }
 }
 
