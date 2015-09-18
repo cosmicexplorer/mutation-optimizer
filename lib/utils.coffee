@@ -8,12 +8,13 @@ Array.prototype.splitLength = (len) -> splitLength len, @
 sum = (arr) -> arr.reduce ((a, b) -> a + b), 0
 Array.prototype.sum = -> sum @
 
-countSubstr = (str, substr) ->
+countSubstr = (str, substr, incrementBySubstr) ->
+  amountToIncrement = if incrementBySubstr then substr.length else 1
   count = 0
   ind = str.indexOf substr
   while ind isnt -1
     ++count
-    ind = str.indexOf substr, ind + 1
+    ind = str.indexOf substr, ind + amountToIncrement
   count
 String.prototype.countSubstr = (substr) -> countSubstr @, substr
 Array.prototype.countSubstr = (substr) -> countSubstr @, substr
