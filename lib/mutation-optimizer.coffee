@@ -109,6 +109,7 @@ class AminoAcidSequence extends Sequence
 # TODO: add homology repeats once mutation-optimization implemented
 class Count
   @DefaultHomologyCount: 5
+  @RepeatRunCount: 4
   # all sequences here are assumed to be strings!!!
   @WeightedPyrDimerMap: (->
     dimers = utils.ConvoluteKeysValues symbols.WeightedPyrDimers
@@ -131,20 +132,23 @@ class Count
     (v * seq.countSubstr k for k, v of @WeightedPyrDimerMap).sum()
   @methylationSites: (seq) =>
     @countOccurrences seq, symbols.MethylationSites
-  @repeatRuns: (seq) =>
+  @repeatRuns: (seq, count = @RepeatRunCount) =>
     totalRuns = 0
     prevChar = null
     curRun = 0
     for ch in seq
       if ch is prevChar then ++curRun else curRun = 0
-      if curRun >= 3 then ++totalRuns
+      if curRun >= (count - 1) then ++totalRuns
       prevChar = ch
     totalRuns
   # TODO: find more meaningful representation of this, also optimize
   @homologyRepeatCount: (seq, count = @DefaultHomologyCount) =>
     numRepeats = 0
     for i in [0..(seq.length - count)] by 1
-      ++numRepeats if seq.indexOf seq[i..(i + count)] isnt -1
+      # assume sequence is only composed of A, C, T, G
+      reg = new RegExp seq[i..(i + count - 1)], 'gi'
+      console.log reg
+      ++numRepeats if (seq.match(reg) or []).length > 1
     numRepeats
   @deaminationSites: (seq) => @countOccurrences seq, symbols.DeaminationSites
   # DIFFERS FROM PY AT ds[0] because of indexing
