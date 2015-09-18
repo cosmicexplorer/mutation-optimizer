@@ -238,7 +238,7 @@ MutationOptimizerApp = React.createClass
         <div className="container-fluid">
           <div className="navbar-header">
             <a className="navbar-brand" href="#" target="_blank">
-              mutation-optimizer v0.0
+              {S.VersionName}
             </a>
             {
               <a href={val} target="_blank" key={key}>
