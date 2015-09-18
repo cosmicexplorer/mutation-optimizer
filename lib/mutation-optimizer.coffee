@@ -27,20 +27,20 @@ class Sequence
         @err "non-IUPAC symbol: #{sym}"
       cst.TransformSyms[sym] or sym).join ''
     @fixEnds @check(cleaned), cst.FixEndOpts
-  fixEnds: (strOrArr, opts) ->
+  fixEnds: (strOrArr, opts) -> strOrArr
     # TODO: fix/reinstate this
-    {beg, end, doThrow} = opts
-    if beg
-      activeStr = strOrArr[..(beg.len - 1)]
-      if beg.text.indexOf(activeStr) is -1
-        @err "Error at beginning of sequence #{activeStr}" if doThrow
-        strOrArr = beg[0] + strOrArr
-    if end
-      activeStr = strOrArr[(-end.len)..]
-      if end.text.indexOf(activeStr) is -1
-        @err "Error at end of sequence #{activeStr}" if doThrow
-        strOrArr = strOrArr + end[0]
-    strOrArr
+    # {beg, end, doThrow} = opts
+    # if beg
+    #   activeStr = strOrArr[..(beg.len - 1)]
+    #   if beg.text.indexOf(activeStr) is -1
+    #     @err "Error at beginning of sequence #{activeStr}" if doThrow
+    #     strOrArr = beg[0] + strOrArr
+    # if end
+    #   activeStr = strOrArr[(-end.len)..]
+    #   if end.text.indexOf(activeStr) is -1
+    #     @err "Error at end of sequence #{activeStr}" if doThrow
+    #     strOrArr = strOrArr + end[0]
+    # strOrArr
 
 ORF_THRESHOLD = 100
 
@@ -80,21 +80,25 @@ class AminoAcidSequence extends Sequence
     seq
 
   @MutationWindowLength: 3
-  minimizeMutation: ->
-    aminoString = @clean().split('')
+  # singleWeight is a single function to use for optimization; if not given, it
+  # optimizes using the weights given in symbols.FunctionWeights
+  minimizeMutation: ({singleWeight = null, cleanedSeq = null} = {}) ->
+    aminoString = cleanedSeq or @clean().split ''
     finalString = new Array aminoString.length
     # TODO: consider version where we greedily choose current index of codon
     # based on sum of weights of all codon combinations it's contained in,
     # instead of just the codon combination with the least weight
     finalInd = aminoString.length - @constructor.MutationWindowLength + 1
+    # console.log aminoString[0..5]
     for i in [0..(finalInd - 1)] by 1
-      finalString[i] = aminoString[i..(i + @constructor.MutationWindowLength)]
+      intermed = aminoString[i..(i + @constructor.MutationWindowLength)]
         .map((el) -> symbols.DNACodonAminoMap[el])
-        .getAllCombinations()
+      console.log aminoString unless intermed[0]
+      finalString[i] = intermed.getAllCombinations()
         .map((codonSeq) ->
           first: codonSeq[0]
           count: Count.MutabilityScore(
-            codonSeq.join(''), finalString[..(i - 1)]))
+            codonSeq.join(''), finalString[..(i - 1)], singleWeight))
         .reduce(getMinCount)
         .first
     aminoString[finalInd..(finalInd + @constructor.MutationWindowLength - 1)]
@@ -106,6 +110,24 @@ class AminoAcidSequence extends Sequence
       .reduce(getMinCount).seq.forEach (el, ind) ->
         finalString[finalInd + ind] = el
     new DNASequence finalString.join ''
+
+  minimizeAllMutations: (orig) ->
+    orig =
+      name: 'original'
+      counts: Count.AllCounts orig
+    cleaned = @clean().split ''
+    specificallyOptimizedSequences = Count.AllFuns.map (f) =>
+      name: f.name
+      counts: Count.AllCounts (@minimizeMutation
+        singleWeight: f.func
+        cleanedSeq: cleaned).seq
+    globallyOptimized =
+      name: 'global'
+      counts: Count.AllCounts @minimizeMutation().seq
+    res = {}
+    specificallyOptimizedSequences.concat([orig, globallyOptimized])
+      .forEach (el) -> res[el.name] = el.counts
+    res
 
 # TODO: consider using cached search tree or something if countOccurrences ends
 # up needing a bit more speed
@@ -169,7 +191,7 @@ class Count
 
   @AllFuns: for k, v of symbols.FunctionWeights
     {func: @[v.func], weight: v.weight, name: v.func}
-  @AllCounts: (seq, constrSeq) =>
+  @AllCounts: (seq, constrSeq = seq) =>
     res = {}
     sum = 0
     for el in @AllFuns
@@ -178,8 +200,9 @@ class Count
       res[el.name] = cur
     res.mutability_score = sum
     res
-  @MutabilityScore: (seq, constrSeq) =>
-    @AllFuns.map((w) -> w.func(seq, constrSeq) * w.weight).sum()
+  @MutabilityScore: (seq, constrSeq, singleWeight) =>
+    if singleWeight then singleWeight seq, constrSeq else
+      @AllFuns.map((w) -> w.func(seq, constrSeq) * w.weight).sum()
 
 class DNASequence extends Sequence
   @ValidIUPACSyms: symbols.DNAIUPAC

@@ -108,6 +108,8 @@ module.exports =
   TTDimers: ['TT', 'AA']
   OtherPyrDimers: ['CT', 'TC', 'CC', 'CY', 'TY', 'YC', 'YT', 'YY', 'GA', 'AG',
     'GG', 'AR', 'RA', 'GR', 'RG', 'RR']
+  # TODO: modify these weights as given from UV dimer products pdf in this
+  # directory
   WeightedPyrDimers:
     '.581': ['TT', 'AA']
     '.586': ['TC', 'GA']
