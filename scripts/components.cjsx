@@ -226,7 +226,10 @@ MutationOptimizerApp = React.createClass
     selectedElement: null
     inputText: ''
     inputType: S.InitialButtonTitle
-    advancedOptions: JSON.parse JSON.stringify S.AdvancedOptions
+    advancedOptions: do ->
+      res = JSON.parse JSON.stringify S.AdvancedOptions
+      res[k] = no for k, v of res
+      res
     parameterizedOptions: JSON.parse JSON.stringify S.ParameterizedOptions
     isDefaultChecked: no
   render: ->
