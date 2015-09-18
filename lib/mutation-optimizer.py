@@ -270,6 +270,45 @@ def codon_usage(codon):         #Greater value indicates more efficient expressi
         print('One or more codons were invalid')
         raise SystemExit
 
+def get_all_counts(seq, seq_construction):
+    TT_dimers=TT_dimer_count(seq)
+    other_pyr_dimers=other_pyr_dimer_count([seq])
+    weighted_pyr_dimers=weighted_pyr_dimer_count(seq)
+    methyl_sites=methylation_sites(seq)
+    run_repeats=repeat_runs(seq)
+    homologies=homology_repeats(seq,seq_construction)
+    deaminated_sites=deamination_sites(seq)
+    alkylated_sites=alkylation_sites(seq)
+    oxidized_sites=oxidation_sites(seq)
+    other_misc_sites=misc_other_sites(seq)
+    hairpins=hairpin_sites(seq)
+    IS_sites=insertion_sequences(seq)
+    anti_sd_sites=anti_shine_delgarno_count(seq)
+    blacklisted_codons=rate_limiting_codon_count(seq)
+    RFC10_illegal=RFC10_sites(seq)
+    mutability_score=float(3*weighted_pyr_dimers+2*methyl_sites+5*run_repeats+0.5*homologies+1*deaminated_sites+1*alkylated_sites+3*oxidized_sites+0.5*other_misc_sites+2*hairpins+8*IS_sites+5*anti_sd_sites+1000*blacklisted_codons+1000*RFC10_illegal)  #Method of ranking sequences based on arbitrary coefficients before each hotspot type.
+    return {
+        'TT_dimers': TT_dimers,
+        'other_pyr_dimers': other_pyr_dimers,
+        'weighted_pyr_dimers': weighted_pyr_dimers,
+        'methyl_sites': methyl_sites,
+        'run_repeats': run_repeats,
+        'homologies': homologies,
+        'deaminated_sites': deaminated_sites,
+        'alkylated_sites': alkylated_sites,
+        'oxidized_sites': oxidized_sites,
+        'other_misc_sites': other_misc_sites,
+        'hairpins': hairpins,
+        'IS_sites': IS_sites,
+        'anti_sd_sites': anti_sd_sites,
+        'blacklisted_codons': blacklisted_codons,
+        'RFC10_illegal': RFC10_illegal,
+        'mutability_score': mutability_score
+    }
+
+def get_all_weighted_codons(seq, seq_construction):
+    return get_all_counts(seq, seq_construction)['mutability_score']
+
 def minimize_overall_mutation(aa_seq):          #Main function. Weighs all mutation hotspots and outputs DNA sequence that has minimal number of hotspots but codes for same amino acid sequence as input. If DNA sequence input, do dna_to_aa_translation first
     aa_seq=aa_seq_check(aa_seq)
     all_possible_codons=[]
@@ -345,22 +384,9 @@ def minimize_overall_mutation(aa_seq):          #Main function. Weighs all mutat
             possible_codon_windows[k]=''.join(possible_codon_windows[k])
         mutability_scores=[]
         for j in range(0,len(possible_codon_windows)):              #Calculates the number of each type of mutation hotspot in the sequence of 3 codons at a time. Sliding window scan (ie A+B+C, then B+C+D)
-            TT_dimers=TT_dimer_count(possible_codon_windows[j])
-            other_pyr_dimers=other_pyr_dimer_count([possible_codon_windows[j]])
-            weighted_pyr_dimers=weighted_pyr_dimer_count(possible_codon_windows[j])
-            methyl_sites=methylation_sites(possible_codon_windows[j])
-            run_repeats=repeat_runs(possible_codon_windows[j])
-            homologies=homology_repeats(possible_codon_windows[j],seq_construction)
-            deaminated_sites=deamination_sites(possible_codon_windows[j])
-            alkylated_sites=alkylation_sites(possible_codon_windows[j])
-            oxidized_sites=oxidation_sites(possible_codon_windows[j])
-            other_misc_sites=misc_other_sites(possible_codon_windows[j])
-            hairpins=hairpin_sites(possible_codon_windows[j])
-            IS_sites=insertion_sequences(possible_codon_windows[j])
-            anti_sd_sites=anti_shine_delgarno_count(possible_codon_windows[j])
-            blacklisted_codons=rate_limiting_codon_count(possible_codon_windows[j])
-            RFC10_illegal=RFC10_sites(possible_codon_windows[j])
-            mutability_score=float(3*weighted_pyr_dimers+2*methyl_sites+5*run_repeats+0.5*homologies+1*deaminated_sites+1*alkylated_sites+3*oxidized_sites+0.5*other_misc_sites+2*hairpins+8*IS_sites+5*anti_sd_sites+1000*blacklisted_codons+1000*RFC10_illegal)  #Method of ranking sequences based on arbitrary coefficients before each hotspot type.
+            mutability_score = get_all_weighted_codons(
+                possible_codon_windows[j],
+                seq_construction)
             mutability_scores.append(mutability_score-seq_codon_usage_avg(possible_codon_windows[j]))
         optimal_index=mutability_scores.index(min(mutability_scores))           #The sequence with the lowest score based on the above formula is selected as the optimal sequence
         if i <len(aa_seq)-3:

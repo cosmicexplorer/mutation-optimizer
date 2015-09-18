@@ -86,20 +86,25 @@ class AminoAcidSequence extends Sequence
     # TODO: consider version where we greedily choose current index of codon
     # based on sum of weights of all codon combinations it's contained in,
     # instead of just the codon combination with the least weight
-    for i in [0..(aminoString.length - @constructor.MutationWindowLength)] by 1
+    finalInd = aminoString.length - @constructor.MutationWindowLength + 1
+    for i in [0..(finalInd - 1)] by 1
       finalString[i] = aminoString[i..(i + @constructor.MutationWindowLength)]
         .map((el) -> symbols.DNACodonAminoMap[el])
         .getAllCombinations()
         .map((codonSeq) ->
           first: codonSeq[0]
-          score: Count.AllFuns.map((w) ->
-            w.func(codonSeq.join '') * w.weight).sum())
+          count: Count.MutabilityScore(
+            codonSeq.join(''), finalString[..(i - 1)]))
         .reduce(getMinCount)
         .first
-    lastFewCodonsIndex = aminoString.length -
-      (@constructor.MutationWindowLength + 1)
-    for i in [(lastFewCodonsIndex)..(aminoString.length - 1)] by 1
-      finalString[i] = aminoString[i]
+    aminoString[finalInd..(finalInd + @constructor.MutationWindowLength - 1)]
+      .map((el) -> symbols.DNACodonAminoMap[el])
+      .getAllCombinations()
+      .map((codonSeq) ->
+        seq: codonSeq
+        count: Count.MutabilityScore(codonSeq.join ''))
+      .reduce(getMinCount).seq.forEach (el, ind) ->
+        finalString[finalInd + ind] = el
     new DNASequence finalString.join ''
 
 # TODO: consider using cached search tree or something if countOccurrences ends
@@ -118,6 +123,7 @@ class Count
   @countOccurrences: (containerSet, symbolSet) ->
     symbolSet.map((el) -> containerSet.countSubstr el).sum()
   @splitCodons: (seq) -> seq.splitLength CODON_LENGTH
+
   # counts ensue
   @rateLimitingCodons: (seq) => @splitCodons(seq).filter((el) ->
     symbols.RateLimitingCodons.indexOf(el) isnt -1).length
@@ -132,7 +138,7 @@ class Count
     (v * seq.countSubstr k for k, v of @WeightedPyrDimerMap).sum()
   @methylationSites: (seq) =>
     @countOccurrences seq, symbols.MethylationSites
-  @repeatRuns: (seq, count = @RepeatRunCount) =>
+  @repeatRuns: (seq, unused, count = @RepeatRunCount) =>
     totalRuns = 0
     prevChar = null
     curRun = 0
@@ -142,13 +148,12 @@ class Count
       prevChar = ch
     totalRuns
   # TODO: find more meaningful representation of this, also optimize
-  @homologyRepeatCount: (seq, count = @DefaultHomologyCount) =>
+  @homologyRepeatCount: (seq, currentSeq, count = @DefaultHomologyCount) =>
     numRepeats = 0
     for i in [0..(seq.length - count)] by 1
       # assume sequence is only composed of A, C, T, G
       reg = new RegExp seq[i..(i + count - 1)], 'gi'
-      console.log reg
-      ++numRepeats if (seq.match(reg) or []).length > 1
+      ++numRepeats if (seq.match(reg) or []).length > 0
     numRepeats
   @deaminationSites: (seq) => @countOccurrences seq, symbols.DeaminationSites
   # DIFFERS FROM PY AT ds[0] because of indexing
@@ -161,9 +166,20 @@ class Count
   @insertionSequences: (seq) =>
     @countOccurrences seq, symbols.InsertionSequences
   @RFC10Sites: (seq) => @countOccurrences seq, symbols.RFC10Sites
+
   @AllFuns: for k, v of symbols.FunctionWeights
-      func: @[v.func]
-      weight: v.weight
+    {func: @[v.func], weight: v.weight, name: v.func}
+  @AllCounts: (seq, constrSeq) =>
+    res = {}
+    sum = 0
+    for el in @AllFuns
+      cur = el.func seq, constrSeq
+      sum += cur * el.weight
+      res[el.name] = cur
+    res.mutability_score = sum
+    res
+  @MutabilityScore: (seq, constrSeq) =>
+    @AllFuns.map((w) -> w.func(seq, constrSeq) * w.weight).sum()
 
 class DNASequence extends Sequence
   @ValidIUPACSyms: symbols.DNAIUPAC
