@@ -115,7 +115,7 @@ module.exports =
     '.0111': ['CC', 'GG']
   MethylationSites: ['GATC', 'CTAG', 'CCAGG', 'CCTGG', 'GGTCC', 'GGACC']
   DeaminationSites: ['CG', 'GC']
-  AlkylationSites: ['GG', 'AG', 'TC', 'GA']
+  AlkylationSites: ['GG', 'CC', 'AG', 'CT', 'TC', 'GA']
   OxidationSites: ['GGG', 'GG', 'CCC', 'CC']
   MiscSites: ['TTG', 'CTG', 'GTGG', 'CCAC', 'GGCGCC']
   HairpinSites: [
@@ -193,6 +193,9 @@ module.exports =
     'Alkylation':
       func: 'alkylationSites'
       weight: 1
+    'Methyl':
+      func: 'methylationSites'
+      weight: 2
     'Oxidation':
       func: 'oxidationSites'
       weight: 3
