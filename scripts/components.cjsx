@@ -243,7 +243,7 @@ MutationOptimizerApp = React.createClass
             {
               <a href={val} target="_blank" key={key}>
                 <button type="button" className="btn btn-default navbar-btn">
-                {key}
+                  {key}
                 </button>
               </a> for key, val of S.NavbarButtons
             }
