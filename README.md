@@ -1,6 +1,8 @@
 mutation-optimizer
 ==================
 
+![test version of gui](docs/gui_test.png)
+
 A web interface, js translation, npm module, and executable for the original [mutation-optimizer script](lib/mutation-optimizer.py) written by Jarrod Shilts at Vanderbilt University.
 
 # Dependencies
