@@ -263,3 +263,21 @@ module.exports =
   AminoAcidSequence: AminoAcidSequence
   DNASequence: DNASequence
   Count: Count
+
+red = (a, b) ->
+  a[k] = (a[k] or 0) + v for k, v of b
+  a
+
+dnaComplete = (Object.keys dnaParts).map((el) ->
+  el = dnaParts[el]
+  res = {}
+  for k, v of el.original
+    res[k] = v - el.global[k]
+  res).reduce red, {}
+
+aminoComplete = (Object.keys aminoParts).map((el) ->
+  el = aminoParts[el]
+  res = {}
+  for k, v of el.original
+    res[k] = v - el.global[k]
+  res).reduce red, {}
