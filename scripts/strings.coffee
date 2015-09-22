@@ -13,13 +13,13 @@ module.exports =
   SearchPanelDefault: 'Search for...'
   SpeciesToSearch: [
     'E. coli'
-    'S. cerevisiae'
-    'H. sapiens'
-    'M. musculus'
     'B. subtilis'
-    'C. elegans'
+    'S. cerevisiae'
     'C. albicans'
-    'Melanogaster'
+    'C. elegans'
+    'D. melanogaster'
+    'M. musculus'
+    'H. sapiens'
     'A. thaliana'
     ]
   InputPanelHeading: 'Sequence Input'
