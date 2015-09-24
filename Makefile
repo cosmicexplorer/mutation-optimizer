@@ -18,7 +18,8 @@ UGLIFY_JS_OPTS := -mc --screw-ie8 2>/dev/null
 
 # external js
 REACT_JS := react
-EXTERN_JS := $(REACT_JS)
+LODASH := lodash
+EXTERN_JS := $(REACT_JS) $(LODASH)
 
 # external css
 BOOTSTRAP := bootstrap
@@ -80,7 +81,7 @@ $(BROWSERIFY_EXTERN_BUNDLE): $(DEPS)
 	$(MAKE_PIPE) $(LESS_CC) $< '|' $(CLEAN_CSS) -o $@
 
 clean:
-	rm -f $(JS_FINAL) $(CSS_OUT) $(JS_OUT)
+	rm -f $(JS_FINAL) $(CSS_OUT) $(JS_OUT) $(BROWSERIFY_EXTERN_BUNDLE)
 
 $(DEPS):
 	npm install

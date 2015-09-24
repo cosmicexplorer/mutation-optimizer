@@ -79,7 +79,7 @@ button {
 }
 
 @standard-border-radius: 5px;
-@big-button-width: 10ex;
+// @big-button-width: 30%;
 @standard-box-shadow: 10px 10px 10px -7px rgba(0, 0, 0, 0.75);
 @dark-border: 1px solid #555;
 .display-item {
@@ -124,11 +124,16 @@ button {
     .panel-heading {
       display: flex;
       justify-content: space-between;
+      flex-wrap: wrap;
       & > p {
-        width: 70%;
+        flex-grow: 5;
       }
-      .btn-group button {
-        width: @big-button-width;
+      .btn-group {
+        display: flex;
+        flex-direction: row;
+        button {
+          flex-shrink: 1;
+        }
       }
     }
     .panel-body {
@@ -159,15 +164,15 @@ button {
     padding-bottom: 10px;
   }
   .option-box {
-      height: 100%;
-      border: 1px solid #d7dada;
-      border-radius: @standard-border-radius;
-      padding: 10px 10px 10px 10px;
-      background-image: linear-gradient( to bottom, @top-button-gradient, @bottom-button-gradient);
-      // flex props
-      flex-grow: 1;
-      display: flex;
-      flex-direction: column;
+    height: 100%;
+    border: 1px solid #d7dada;
+    border-radius: @standard-border-radius;
+    padding: 10px 10px 10px 10px;
+    background-image: linear-gradient( to bottom, @top-button-gradient, @bottom-button-gradient);
+    // flex props
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
   }
 }
 
@@ -182,12 +187,12 @@ input[type=checkbox] + label:before {
 
 // letter-spacing is because the check mark moves around
 input[type=checkbox] + label:before {
-  letter-spacing: 1ex;
+  letter-spacing: 5px;
   content: "\f096";
 }
 
 input[type=checkbox]:checked + label:before {
-  letter-spacing: .7ex;
+  letter-spacing: 3px;
   content: "\f046";
 }
 
@@ -196,7 +201,6 @@ input[type=checkbox]:checked + label:before {
 .options-box {
   display: flex;
   justify-content: space-between;
-  flex-direction: row;
   padding-right: @small-padding-distance;
   padding-left: @small-padding-distance;
 }
@@ -217,4 +221,13 @@ button.btn.btn-default {
 @first-button-padding: 10px;
 button.navbar-btn:last-child {
   margin-left: @first-button-padding;
+}
+
+// this makes the links on a diff line than the brand on chrome
+.navbar-brand {
+  float: none !important;
+}
+
+.navbar-btn {
+  margin-bottom: 10px;
 }

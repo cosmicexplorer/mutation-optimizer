@@ -57,8 +57,9 @@ SearchList = React.createClass
             </button>
           </span>
         </div>
-        <ItemList items={@props.items.filter (el) =>
-          el.match new RegExp transformInputText(@state.inputText), 'i'}
+        <ItemList items={if @state.inputText then @props.items.filter (el) =>
+            el.match new RegExp transformInputText(@state.inputText), 'i'
+          else @props.items}
           selectFn={(selectedElement) =>
             @setState inputText: selectedElement
             @props.fn selectedElement} />
@@ -183,14 +184,13 @@ OptionsBox = React.createClass
 NumericPlaceholder = "0.0"
 makeInputAddon = (el) ->
   <span className="input-group-addon">{el}</span> if el?
-makeLabel = (text, disabled, defaultValue) ->
+makeLabel = (text, disabled) ->
   str = text
-  str += " (#{defaultValue})" if disabled
   <label className="parameter-label">{str}</label>
 ParameterizedOption = React.createClass
   render: ->
     <div className="parameterized-option">
-      {makeLabel @props.text, @props.disabled, @props.initialInput}
+      {makeLabel @props.text, @props.disabled}
       <div className="input-group input-group-sm">
         {makeInputAddon @props.children?[0]}
         <input type={@props.inputType or "text"} className="form-control num"
