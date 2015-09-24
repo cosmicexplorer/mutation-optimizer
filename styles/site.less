@@ -78,13 +78,26 @@ button {
   font-size: @small-font-size;
 }
 
+.row:after, .row:before {
+  content: none !important;
+}
+
+.advanced-options {
+  display: flex;
+  flex-direction: column;
+}
+
 @params-margin: 10px;
 .params-holder {
-  margin-left: @params-margin;
-  margin-right: @params-margin;
+  justify-content: space-around;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+  margin: 0px;
+  padding: 0px;
+  & > * {
+    margin: 5px;
+  }
 }
 
 @standard-border-radius: 5px;

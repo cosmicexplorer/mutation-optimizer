@@ -163,7 +163,7 @@ AdvancedOptions = React.createClass
   render: ->
     <div>
       <label className="spaced">{@props.labelText}</label>
-      <div className='option-pane'>
+      <div className="option-pane advanced-options">
         {@props.children}
       </div>
     </div>
@@ -285,22 +285,16 @@ MutationOptimizerApp = React.createClass
           <div className="col-md-2 more-padding">
             <AdvancedOptions labelText={S.AdvancedOptionsHeading}>
             {
-              ([key, val] for key, val of @state.advancedOptions)
-                .splitLength(AdvancedOptionsPerLine).map (optionsArr, ind) =>
-                  <div className="row" key={ind}>
-                    {
-                      optionsArr.map ([key, val]) =>
-                        <CheckboxWithContext key={key} heading={key}
-                          fn={((e) => (checked) =>
-                            newOptions = @state.advancedOptions
-                            newOptions[e] = checked
-                            @setState advancedOptions: newOptions)(key)}>
-                          <p className="explanation-text">
-                            {S.AdvancedOptions[key]}
-                          </p>
-                        </CheckboxWithContext>
-                    }
-                  </div>
+              ([k, v] for k, v of @state.advancedOptions).map ([key, val]) =>
+                <CheckboxWithContext key={key} heading={key}
+                  fn={((e) => (checked) =>
+                    newOptions = @state.advancedOptions
+                    newOptions[e] = checked
+                    @setState advancedOptions: newOptions)(key)}>
+                  <p className="explanation-text">
+                    {S.AdvancedOptions[key]}
+                  </p>
+                </CheckboxWithContext>
             }
             </AdvancedOptions>
           </div>
