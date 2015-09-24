@@ -174,7 +174,7 @@ OptionsBox = React.createClass
   getInitialState: ->
     disabled: @props.disabled
   render: ->
-    <div className="options-box row">
+    <div className={"options-box row " + @props.newClasses}>
       {
         React.Children.map @props.children, (child) =>
           React.cloneElement child, disabled: @props.disabled
@@ -309,22 +309,19 @@ MutationOptimizerApp = React.createClass
               fn={(checked) => @setState isDefaultChecked: checked}
               labelText={S.ParameterOptionsHeading}>
               {
-                ([key, val] for key, val of @state.parameterizedOptions)
-                  .splitLength(WeightedOptionsPerLine)
-                  .map (optionsArr, ind) =>
-                    <OptionsBox key={ind}>
-                      {
-                        optionsArr.map ([key, val]) =>
-                          <ParameterizedOption key={key} text={key}
-                            fn={((e) => (value) =>
-                              newOptions = @state.parameterizedOptions
-                              newOptions[e] = value
-                              @setState(parameterizedOptions: newOptions)
-                              )(key)}
-                            initialInput={val}
-                            isDisabled=false />
-                      }
-                    </OptionsBox>
+                <OptionsBox newClasses="params-holder">
+                  {
+                    ([k, v] for k, v of @state.parameterizedOptions)
+                    .map ([key, val]) =>
+                      <ParameterizedOption key={key} text={key}
+                        fn={((e) => (value) =>
+                          newOptions = @state.parameterizedOptions
+                          newOptions[e] = value
+                          @setState(parameterizedOptions: newOptions))(key)}
+                        initialInput={val}
+                        isDisabled=false />
+                  }
+                </OptionsBox>
               }
             </DisableableItem>
           </div>
