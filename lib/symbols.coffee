@@ -195,7 +195,7 @@ module.exports =
     'Alkylation':
       func: 'alkylationSites'
       weight: 1
-    'Methyl':
+    'Methylation':
       func: 'methylationSites'
       weight: 2
     'Oxidation':
