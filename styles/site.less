@@ -78,7 +78,8 @@ button {
   font-size: @small-font-size;
 }
 
-.row:after, .row:before {
+.row:after,
+.row:before {
   content: none !important;
 }
 
@@ -181,8 +182,8 @@ button {
   padding-right: 25px;
 }
 
-@top-button-gradient: white;
-@bottom-button-gradient: rgba(226, 226, 226, .3);
+@top-btn-grad: white;
+@bot-btn-grad: rgba(226, 226, 226, .3);
 .option-pane {
   background-color: transparent;
   display: flex;
@@ -199,7 +200,7 @@ button {
     border: 1px solid #d7dada;
     border-radius: @standard-border-radius;
     padding: 10px 10px 10px 10px;
-    background-image: linear-gradient( to bottom, @top-button-gradient, @bottom-button-gradient);
+    background-image: linear-gradient( to bottom, @top-btn-grad, @bot-btn-grad);
     // flex props
     flex-grow: 1;
     display: flex;
