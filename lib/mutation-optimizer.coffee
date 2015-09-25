@@ -82,7 +82,8 @@ class AminoAcidSequence extends Sequence
   @MutationWindowLength: 3
   # singleWeight is a single function to use for optimization; if not given, it
   # optimizes using the weights given in symbols.FunctionWeights
-  minimizeMutation: ({singleWeight = null, cleanedSeq = null} = {}) ->
+  minimizeMutation: ({singleWeight = null, cleanedSeq = null,
+    weights = null} = {}) ->
     aminoString = cleanedSeq or @clean().split ''
     finalString = new Array aminoString.length
     # TODO: consider version where we greedily choose current index of codon
@@ -98,7 +99,7 @@ class AminoAcidSequence extends Sequence
         .map((codonSeq) ->
           first: codonSeq[0]
           count: Count.MutabilityScore(
-            codonSeq.join(''), finalString[..(i - 1)], singleWeight))
+            codonSeq.join(''), finalString[..(i - 1)], {singleWeight, weights}))
         .reduce(getMinCount)
         .first
     aminoString[finalInd..(finalInd + @constructor.MutationWindowLength - 1)]
@@ -190,7 +191,7 @@ class Count
   @RFC10Sites: (seq) => @countOccurrences seq, symbols.RFC10Sites
 
   @AllFuns: for k, v of symbols.FunctionWeights
-    {func: @[v.func], weight: v.weight, name: v.func}
+    {func: @[v.func], weight: v.weight, name: v.func, title: k}
   @AllCounts: (seq, constrSeq = seq) =>
     res = {}
     sum = 0
@@ -200,9 +201,13 @@ class Count
       res[el.name] = cur
     res.mutability_score = sum
     res
-  @MutabilityScore: (seq, constrSeq, singleWeight) =>
+  @MutabilityScore: (seq, constrSeq, {singleWeight = null,
+    weights = null} = {}) =>
     if singleWeight then singleWeight seq, constrSeq else
-      @AllFuns.map((w) -> w.func(seq, constrSeq) * w.weight).sum()
+      f = null
+      if weights then f = (w) -> w.func(seq, constrSeq) * weights[w.title]
+      else f = (w) -> w.func(seq, constrSeq) * w.weight
+      @AllFuns.map(f).sum()
 
 class DNASequence extends Sequence
   @ValidIUPACSyms: symbols.DNAIUPAC
