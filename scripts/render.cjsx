@@ -71,10 +71,10 @@ MutationOptimizerApp = React.createClass
             {
               ([k, v] for k, v of @state.advancedOptions).map ([key, val]) =>
                 <UI.CheckboxWithContext key={key} heading={key}
-                  fn={((e) => (checked) =>
+                  fn={do (key) => (checked) =>
                     newOptions = @state.advancedOptions
-                    newOptions[e] = checked
-                    @setState advancedOptions: newOptions)(key)}>
+                    newOptions[key] = checked
+                    @setState advancedOptions: newOptions}>
                   <p className="explanation-text">
                     {S.AdvancedOptions[key]}
                   </p>
