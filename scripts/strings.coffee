@@ -20,8 +20,7 @@ module.exports =
     'D. melanogaster'
     'M. musculus'
     'H. sapiens'
-    'A. thaliana'
-    ]
+    'A. thaliana']
   InputPanelHeading: 'Sequence Input'
   InitialButtonTitle: 'DNA'
   InputButtonTitlesDirections:
@@ -47,5 +46,5 @@ abbreviations. Stop codons may be omitted, or entered as *, -, or X.'
   AdvancedOptions:
     'Substitute': 'Allow conservative amino acid substitutions.'
     'Optimize': 'Optimize for increased evolutionary potential.'
-    'RFC10': 'Toggle RFC10 recognition.'
+    'RFC10': 'Turn on RFC10 site recognition.'
   VersionName: 'mutation-optimizer v0.0'
