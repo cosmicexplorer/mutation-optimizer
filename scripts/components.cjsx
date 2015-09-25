@@ -14,14 +14,6 @@ ItemList = React.createClass
       </a> for el,i in @props.items}
     </div>
 
-stringToColor = (str) ->
-  hash = 0
-  for a in str.split ''
-    hash = a.charCodeAt(0) + ((hash << 7) - hash)
-  color = '#'
-  for i in [0..2]
-    color += ('00' + ((hash << i * 3) & 0xFF).toString(16)).slice(-2)
-  color
 # make fuzzy search regex by inserting wildcards between every letter
 quoteRegex = (str) ->
   (str + '').replace /[.?*+^$[\]\\(){}|-]/g, "\\$&"

@@ -25,6 +25,15 @@ getSequenceOpt = (state) ->
   weights = if state.isDefaultChecked then null else state.parameterizedOptions
   aminoSeq.minimizeMutation weights
 
+stringToColor = (str) ->
+  hash = 0
+  for a in str.split ''
+    hash = a.charCodeAt(0) + ((hash << 7) - hash)
+  color = '#'
+  for i in [0..2]
+    color += ('00' + ((hash << i * 3) & 0xFF).toString(16)).slice(-2)
+  color
+
 MutationOptimizerApp = React.createClass
   getInitialState: ->
     selectedElement: null
