@@ -45,6 +45,6 @@ abbreviations. Stop codons may be omitted, or entered as *, -, or X.'
   AdvancedOptionsHeading: 'Advanced Options'
   AdvancedOptions:
     'Substitute': 'Allow conservative amino acid substitutions.'
-    'Optimize': 'Optimize for increased evolutionary potential.'
+    'Evolution': 'Optimize for increased evolutionary potential.'
     'RFC10': 'Turn on RFC10 site recognition.'
   VersionName: 'mutation-optimizer v0.0'
