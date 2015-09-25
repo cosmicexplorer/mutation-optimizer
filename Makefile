@@ -19,7 +19,8 @@ UGLIFY_JS_OPTS := -mc --screw-ie8 2>/dev/null
 # external js
 REACT_JS := react
 LODASH := lodash
-EXTERN_JS := $(REACT_JS) $(LODASH)
+DETECT_CHANGE := detect-element-resize
+EXTERN_JS := $(REACT_JS) $(LODASH) $(DETECT_CHANGE)
 
 # external css
 BOOTSTRAP := bootstrap

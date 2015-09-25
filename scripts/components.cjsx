@@ -1,4 +1,5 @@
 React = require 'react'
+DetectResize = require 'detect-element-resize'
 gensym = require './gensym'
 utils = require '../lib/utils'
 
@@ -68,23 +69,49 @@ SearchList = React.createClass
 
 ### text panel ###
 LabeledPanel = React.createClass
+  getInitialState: ->
+    bodyHeight: null
+    resizeListener: null
+  componentDidMount: ->
+    node = React.findDOMNode @refs.panelBody
+    listen = =>
+      @setState bodyHeight: node.clientHeight
+    @setState
+      bodyHeight: node.clientHeight
+      resizeListener: listen
+    DetectResize.addResizeListener node, listen
+  componentWillUnmount: ->
+    node = React.findDOMNode @refs.panelBody
+    DetectResize.removeResizeListener node, @state.resizeListener
   render: ->
     <div>
       <label className="spaced">{@props.labelTitle}</label>
       <div className={@props.outerClasses}>
         <div className="panel panel-default">
           <div className="panel-heading">{@props.headers}</div>
-          <div className="panel-body">{@props.children}</div>
+          <div className="panel-body" ref="panelBody">
+            {
+              React.Children.map @props.children, (child) =>
+                React.cloneElement child, parentHeight: @state.bodyHeight
+            }
+          </div>
         </div>
       </div>
     </div>
 
+# chrome doesn't like making textareas as large as their container. we rerender
+# height as a function of the parent's height
+MagicTextHeightPercentage = .83
 TextSection = React.createClass
   render: ->
     <textarea className="form-control" ref="txtInput"
       readOnly={@props.textReadOnly} value={@props.text}
+      style={do =>
+        h = @props.parentHeight
+        {height: (h * MagicTextHeightPercentage) + "px"} if h?}
       onChange={=> if @props.fn
-        @props.fn React.findDOMNode(@refs.txtInput).value}></textarea>
+        @props.fn React.findDOMNode(@refs.txtInput).value}>
+    </textarea>
 
 OutputTextPanel = React.createClass
   getInitialState: ->
