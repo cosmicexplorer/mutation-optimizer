@@ -20,10 +20,24 @@ getSequenceOpt = (state) ->
   aminoSeq = switch state.inputType
     when 'DNA' then (new Opt.DNASequence state.inputText).toAminoSeq()
     when 'Amino' then new Opt.AminoAcidSequence @state.inputText
-    else throw new Opt.SequenceError "sequence type invalid",
-      "bad sequence type"
+    else throw new Opt.SequenceError "sequence type invalid", "bad seq type"
   weights = if state.isDefaultChecked then null else state.parameterizedOptions
-  aminoSeq.minimizeMutation weights
+  minSeq = aminoSeq.minimizeMutation weights
+  switch state.inputType
+    when 'DNA' then diffSequence state.inputText, minSeq.seq
+    when 'Amino' then <span className="seq-no-highlight">{minSeq.seq}</span>
+
+createSequenceHighlight = (oldCodon, newCodon, ind) ->
+  <span title={"#{oldCodon}->#{newCodon}"} className="seq-highlight" key={ind}>
+    {newCodon}
+  </span>
+
+diffSequence = (oldInput, newInput) ->
+  for i in [0..(newInput.length / 3)] by 1
+    oldCodon = oldInput[i..(i + 2)].toUpperCase()
+    newCodon = newInput[i..(i + 2)].toUpperCase()
+    if oldCodon isnt newCodon then createSequenceHighlight oldCodon, newCodon, i
+    else <span className="seq-no-highlight" key={i}>{newCodon}</span>
 
 stringToColor = (str) ->
   hash = 0
@@ -99,7 +113,7 @@ MutationOptimizerApp = React.createClass
                   console.error res
                   null
                 else
-                  try (getSequenceOpt @state).seq catch err
+                  try (getSequenceOpt @state) catch err
                     console.error err} />
           </div>
         </div>

@@ -93,17 +93,26 @@ LabeledPanel = React.createClass
 
 # chrome doesn't like making textareas as large as their container. we rerender
 # height as a function of the parent's height
-MagicTextHeightPercentage = .83
+MagicTextHeightPercentage = .105
 TextSection = React.createClass
   render: ->
     <textarea className="form-control" ref="txtInput"
       readOnly={@props.textReadOnly} value={@props.text}
       style={do =>
         h = @props.parentHeight
-        {height: (h * MagicTextHeightPercentage) + "px"} if h?}
+        {height: (h * MagicTextHeightPercentage) + "ex"} if h?}
       onChange={=> if @props.fn
         @props.fn React.findDOMNode(@refs.txtInput).value}>
     </textarea>
+
+MagicOutputTextHeightPercentage = .109
+ScrollingDiv = React.createClass
+  render: ->
+    <div className="output-seq" style={do =>
+      h = @props.parentHeight
+      {height: (h * MagicOutputTextHeightPercentage) + "ex"} if h?}>
+      {@props.txt}
+    </div>
 
 OutputTextPanel = React.createClass
   getInitialState: ->
@@ -118,7 +127,7 @@ OutputTextPanel = React.createClass
       ]
     <LabeledPanel labelTitle={@props.name} outerClasses={@props.classes}
       headers={headers}>
-      <TextSection textReadOnly=true text={@state.outputText} />
+      <ScrollingDiv txt={@state.outputText}/>
     </LabeledPanel>
 
 
@@ -236,15 +245,17 @@ DisableableItem = React.createClass
     </AdvancedOptions>
 
 
-module.exports =
-  ItemList: ItemList
-  SearchList: SearchList
-  TextSection: TextSection
-  OutputTextPanel: OutputTextPanel
-  InputTextPanel: InputTextPanel
-  CheckboxOption: CheckboxOption
-  CheckboxWithContext: CheckboxWithContext
-  AdvancedOptions: AdvancedOptions
-  OptionsBox: OptionsBox
-  ParameterizedOption: ParameterizedOption
-  DisableableItem: DisableableItem
+module.exports = {
+  ItemList
+  SearchList
+  TextSection
+  ScrollingDiv
+  OutputTextPanel
+  InputTextPanel
+  CheckboxOption
+  CheckboxWithContext
+  AdvancedOptions
+  OptionsBox
+  ParameterizedOption
+  DisableableItem
+}
