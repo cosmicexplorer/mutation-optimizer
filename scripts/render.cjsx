@@ -1,9 +1,29 @@
 React = require 'react'
 S = require './strings'
 UI = require './components'
+Opt = require '../lib/mutation-optimizer'
 
 AdvancedOptionsPerLine = 2
 WeightedOptionsPerLine = 6
+
+# returns non-null on error
+appStateValid = (state) ->
+  inputs = (k for k of S.InputButtonTitlesDirections)
+  typeValid = inputs.some((k) -> k is state.inputType)
+  return "sequence type invalid" unless typeValid
+  for opt, val in state.parameterizedOptions
+    if isNaN parseFloat val
+      return "#{opt} argument cannot be parsed as a number"
+  null
+
+getSequenceOpt = (state) ->
+  aminoSeq = switch state.inputType
+    when 'DNA' then (new Opt.DNASequence state.inputText).toAminoSeq()
+    when 'Amino' then new Opt.AminoAcidSequence @state.inputText
+    else throw new Opt.SequenceError "sequence type invalid",
+      "bad sequence type"
+  weights = if state.isDefaultChecked then null else state.parameterizedOptions
+  aminoSeq.minimizeMutation weights
 
 MutationOptimizerApp = React.createClass
   getInitialState: ->
@@ -62,7 +82,16 @@ MutationOptimizerApp = React.createClass
             <UI.OutputTextPanel text={S.OutputDirections}
               name={S.OutputPanelHeading} classes="display-item tall-object"
               buttonText={S.OutputButtonText}
-              getOutputFn={=> JSON.stringify @state} />
+              getOutputFn={=>
+                console.log @state
+                res = appStateValid @state
+                if res
+                  # TODO: display modal or some error text?
+                  console.error res
+                  null
+                else
+                  try (getSequenceOpt @state).seq catch err
+                    console.error err} />
           </div>
         </div>
         <div className="row">

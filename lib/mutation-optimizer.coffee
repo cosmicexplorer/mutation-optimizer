@@ -82,6 +82,8 @@ class AminoAcidSequence extends Sequence
   @MutationWindowLength: 3
   # singleWeight is a single function to use for optimization; if not given, it
   # optimizes using the weights given in symbols.FunctionWeights
+  # weights is an associative object mapping the "title" of each weight given in
+  # symbols.FunctionWeights to a floating-point number
   minimizeMutation: ({singleWeight = null, cleanedSeq = null,
     weights = null} = {}) ->
     aminoString = cleanedSeq or @clean().split ''
@@ -286,3 +288,10 @@ class DNASequence extends Sequence
 #   for k, v of el.original
 #     res[k] = v - el.global[k]
 #   res).reduce red, {}
+
+module.exports = {
+  SequenceError
+  AminoAcidSequence
+  Count
+  DNASequence
+}
