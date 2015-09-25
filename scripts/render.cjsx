@@ -2,6 +2,7 @@ React = require 'react'
 S = require './strings'
 UI = require './components'
 Opt = require '../lib/mutation-optimizer'
+Spinner = require 'spin.js'
 
 AdvancedOptionsPerLine = 2
 WeightedOptionsPerLine = 6
@@ -109,12 +110,13 @@ MutationOptimizerApp = React.createClass
                 console.log @state
                 res = appStateValid @state
                 if res
-                  # TODO: display modal or some error text?
-                  console.error res
+                  console.error JSON.stringify res
+                  alert res
                   null
                 else
                   try (getSequenceOpt @state) catch err
-                    console.error err} />
+                    console.error JSON.stringify res
+                    alert err} />
           </div>
         </div>
         <div className="row">

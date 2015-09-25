@@ -25,6 +25,7 @@
     "dump-stream": "0.0.7",
     "lodash": "^3.10.1",
     "react": "^0.13.3",
+    "spin.js": "^2.3.2",
     "xml-stream": "^0.4.5"
   }
 }

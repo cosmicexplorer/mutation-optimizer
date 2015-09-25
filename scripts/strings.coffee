@@ -2,7 +2,7 @@ _ = require 'lodash'
 symbols = require '../lib/symbols'
 
 # knobs we won't allow the user to turn
-nonOptions = ['RFC10']
+nonOptions = ['RFC10', 'Rate Limiting Codons']
 
 module.exports =
   DefaultSpeciesText: "No species selected."
@@ -30,7 +30,7 @@ with a stop codon, that contains only A, G, C, and T.'
 abbreviations. Stop codons may be omitted, or entered as *, -, or X.'
   OutputPanelHeading: 'Codon Output'
   OutputButtonText: 'Go!'
-  OutputDirections: 'Output Directions'
+  OutputDirections: 'CHANGE THIS TO SOMETHING THAT MATTERS'
   ParameterOptionsHeading: 'Input Parameters'
   DefaultParamLabel: 'Use Default Parameters'
   ParameterizedOptions: do ->
@@ -44,7 +44,8 @@ abbreviations. Stop codons may be omitted, or entered as *, -, or X.'
     res
   AdvancedOptionsHeading: 'Advanced Options'
   AdvancedOptions:
-    'Substitute': 'Allow conservative amino acid substitutions.'
+    'Conservative Substitutions': 'Allow conservative amino acid substitutions.'
     'Evolution': 'Optimize for increased evolutionary potential.'
     'RFC10': 'Turn on RFC10 site recognition.'
+    'Rate Limiting Codons': 'Ignore rate-limiting codons.'
   VersionName: 'mutation-optimizer v0.0'
