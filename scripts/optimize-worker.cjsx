@@ -14,9 +14,20 @@ self.onmessage = (e) ->
   self.postMessage makeError "invalid state" if e.invalidState
   state = e.data
   try
+    weights = if state.isDefaultChecked then null else
+      state.parameterizedOptions
+    console.error weights
+    newSeq = (getSequenceOpt state).seq
+    newSeqScore = Opt.Count.MutabilityScore newSeq, newSeq, {weights}
+    oldSeq = state.inputText
+    oldSeqScore = Opt.Count.MutabilityScore oldSeq, oldSeq, {weights}
     self.postMessage
-      oldSeq: state.inputText
-      seqObj: getSequenceOpt state
+      oldSeqObj:
+        seq: oldSeq
+        score: oldSeqScore
+      newSeqObj:
+        seq: newSeq
+        score: newSeqScore
       type: state.inputType
   catch err
     self.postMessage makeError err

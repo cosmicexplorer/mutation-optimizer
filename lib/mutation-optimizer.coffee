@@ -207,7 +207,12 @@ class Count
     weights = null} = {}) =>
     if singleWeight then singleWeight seq, constrSeq else
       f = null
-      if weights then f = (w) -> w.func(seq, constrSeq) * weights[w.title]
+      if weights
+        # for weights not given (usually in nonOptions in strings.coffee), we
+        # assume the default weights
+        for entry in @AllFuns
+          weights[entry.title] = entry.weight unless weights[entry.title]
+        f = (w) -> w.func(seq, constrSeq) * weights[w.title]
       else f = (w) -> w.func(seq, constrSeq) * w.weight
       @AllFuns.map(f).sum()
 

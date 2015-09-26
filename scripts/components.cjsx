@@ -156,18 +156,21 @@ OutputTextPanel = React.createClass
     workerFn: null
   componentDidMount: ->
     workerFn = (msg) =>
-      {err, txt, oldSeq, seqObj, type} = msg.data
+      {err, txt, oldSeqObj, newSeqObj, type} = msg.data
       if err
         alert txt.message
         @setState
           spinning: no
-          outputText: 'ERROR'
+          outputText: <span>ERROR</span>
       else
+        console.log "#{oldSeqObj.score}->#{newSeqObj.score}"
         @setState
           spinning: no
           outputText: switch type
-            when 'DNA' then diffSequence oldSeq, seqObj.seq
-            when 'Amino' then <span className="seq-no-highlight">{seqObj}</span>
+            when 'DNA' then diffSequence oldSeqObj.seq, newSeqObj.seq
+            when 'Amino' then <span className="seq-no-highlight">
+              {newSeqObj.seq}
+            </span>
     @props.worker.addEventListener 'message', workerFn
     @setState workerFn: workerFn
   componentWillUnmount: ->

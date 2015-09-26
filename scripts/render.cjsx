@@ -10,9 +10,6 @@ if typeof Worker is undefined
 else
   worker = new Worker 'scripts/optimize-worker-out.js'
 
-AdvancedOptionsPerLine = 2
-WeightedOptionsPerLine = 6
-
 # returns non-null on error
 appStateValid = (state) ->
   inputs = (k for k of S.InputButtonTitlesDirections)
