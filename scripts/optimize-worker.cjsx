@@ -16,7 +16,6 @@ self.onmessage = (e) ->
   try
     weights = if state.isDefaultChecked then null else
       state.parameterizedOptions
-    console.error weights
     newSeq = (getSequenceOpt state).seq
     newSeqScore = Opt.Count.MutabilityScore newSeq, newSeq, {weights}
     oldSeq = state.inputText
