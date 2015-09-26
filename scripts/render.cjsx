@@ -2,7 +2,13 @@ React = require 'react'
 S = require './strings'
 UI = require './components'
 
-worker = new Worker 'scripts/optimize-worker-out.js'
+
+worker = null
+if typeof Worker is undefined
+  alert "This page uses Web Workers, a feature your browser does not support. To
+  use this application, please upgrade your web browser."
+else
+  worker = new Worker 'scripts/optimize-worker-out.js'
 
 AdvancedOptionsPerLine = 2
 WeightedOptionsPerLine = 6
