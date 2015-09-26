@@ -1,8 +1,8 @@
 React = require 'react'
 S = require './strings'
 UI = require './components'
-Opt = require '../lib/mutation-optimizer'
-Spinner = require 'spin.js'
+
+worker = new Worker 'scripts/optimize-worker-out.js'
 
 AdvancedOptionsPerLine = 2
 WeightedOptionsPerLine = 6
@@ -16,29 +16,6 @@ appStateValid = (state) ->
     if isNaN parseFloat val
       return "#{opt} argument cannot be parsed as a number"
   null
-
-getSequenceOpt = (state) ->
-  aminoSeq = switch state.inputType
-    when 'DNA' then (new Opt.DNASequence state.inputText).toAminoSeq()
-    when 'Amino' then new Opt.AminoAcidSequence @state.inputText
-    else throw new Opt.SequenceError "sequence type invalid", "bad seq type"
-  weights = if state.isDefaultChecked then null else state.parameterizedOptions
-  minSeq = aminoSeq.minimizeMutation weights
-  switch state.inputType
-    when 'DNA' then diffSequence state.inputText, minSeq.seq
-    when 'Amino' then <span className="seq-no-highlight">{minSeq.seq}</span>
-
-createSequenceHighlight = (oldCodon, newCodon, ind) ->
-  <span title={"#{oldCodon}->#{newCodon}"} className="seq-highlight" key={ind}>
-    {newCodon}
-  </span>
-
-diffSequence = (oldInput, newInput) ->
-  for i in [0..(newInput.length / 3)] by 1
-    oldCodon = oldInput[i..(i + 2)].toUpperCase()
-    newCodon = newInput[i..(i + 2)].toUpperCase()
-    if oldCodon isnt newCodon then createSequenceHighlight oldCodon, newCodon, i
-    else <span className="seq-no-highlight" key={i}>{newCodon}</span>
 
 stringToColor = (str) ->
   hash = 0
@@ -106,17 +83,12 @@ MutationOptimizerApp = React.createClass
             <UI.OutputTextPanel text={S.OutputDirections}
               name={S.OutputPanelHeading} classes="display-item tall-object"
               buttonText={S.OutputButtonText}
-              getOutputFn={=>
-                console.log @state
+              worker={worker} getStateFn={=>
                 res = appStateValid @state
                 if res
-                  console.error JSON.stringify res
-                  alert res
-                  null
-                else
-                  try (getSequenceOpt @state) catch err
-                    console.error JSON.stringify res
-                    alert err} />
+                  alert JSON.stringify res
+                  {invalidState: yes}
+                else @state}/>
           </div>
         </div>
         <div className="row">

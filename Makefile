@@ -20,8 +20,8 @@ UGLIFY_JS_OPTS := -mc --screw-ie8 2>/dev/null
 REACT_JS := react
 LODASH := lodash
 DETECT_CHANGE := detect-element-resize
-SPIN_JS := spin.js
-EXTERN_JS := $(REACT_JS) $(LODASH) $(DETECT_CHANGE) $(SPIN_JS)
+REACT_SPIN := react-spin
+EXTERN_JS := $(REACT_JS) $(LODASH) $(DETECT_CHANGE) $(REACT_SPIN)
 
 # external css
 BOOTSTRAP := bootstrap
@@ -60,10 +60,20 @@ BROWSERIFY_EXTERN_REQUIRE := $(patsubst %,-r %,$(EXTERN_JS))
 BROWSERIFY_EXTERN_NOREQ := $(patsubst %,-x %,$(EXTERN_JS))
 BROWSERIFY_EXTERN_BUNDLE := $(SCRIPTS_DIR)/vendor.js
 
+# web worker bundle
+OPTIMIZE_WORKER_IN := $(SCRIPTS_DIR)/optimize-worker.js \
+	$(LIB_DIR)/mutation-optimizer.js
+OPTIMIZE_WORKER_BUNDLE := $(SCRIPTS_DIR)/optimize-worker-out.js
+
 # declarations
-TARGETS := $(JS_FINAL) $(CSS_OUT) $(BROWSERIFY_EXTERN_BUNDLE) $(BIOBRICK_OUT)
+TARGETS := $(JS_FINAL) $(CSS_OUT) $(BROWSERIFY_EXTERN_BUNDLE) $(BIOBRICK_OUT) \
+	$(OPTIMIZE_WORKER_BUNDLE)
 
 all: $(TARGETS)
+
+$(OPTIMIZE_WORKER_BUNDLE): $(OPTIMIZE_WORKER_IN) $(DEPS)
+	$(MAKE_PIPE) $(BROWSERIFY) $(OPTIMIZE_WORKER_IN) '|' $(UGLIFY_JS) \
+		$(UGLIFY_JS_OPTS) -o $@
 
 $(JS_FINAL): $(JS_OUT) $(DEPS)
 	$(MAKE_PIPE) $(BROWSERIFY) $(BROWSERIFY_EXTERN_NOREQ) $(JS_OUT) '|' \
@@ -83,7 +93,8 @@ $(BROWSERIFY_EXTERN_BUNDLE): $(DEPS)
 	$(MAKE_PIPE) $(LESS_CC) $< '|' $(CLEAN_CSS) -o $@
 
 clean:
-	rm -f $(JS_FINAL) $(CSS_OUT) $(JS_OUT) $(BROWSERIFY_EXTERN_BUNDLE)
+	rm -f $(TARGETS) $(OPTIMIZE_WORKER_IN) $(JS_FINAL) $(CSS_OUT) \
+		$(JS_OUT) $(BROWSERIFY_EXTERN_BUNDLE)
 
 $(DEPS):
 	npm install

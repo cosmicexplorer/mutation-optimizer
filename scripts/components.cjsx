@@ -1,4 +1,5 @@
 React = require 'react'
+Spinner = require 'react-spin'
 DetectResize = require 'detect-element-resize'
 gensym = require './gensym'
 utils = require '../lib/utils'
@@ -108,26 +109,82 @@ TextSection = React.createClass
 MagicOutputTextHeightPercentage = .109
 ScrollingDiv = React.createClass
   render: ->
-    <div className="output-seq" style={do =>
+    <div className="output-seq" style={
       h = @props.parentHeight
       {height: (h * MagicOutputTextHeightPercentage) + "ex"} if h?}>
       {@props.txt}
     </div>
 
+spinCfg =
+  lines: 13
+  length: 28
+  width: 14
+  radius: 42
+  scale: 1
+  corners: 1
+  color: '#000'
+  opacity: 0.25
+  rotate: 0
+  direction: 1
+  speed: 1
+  trail: 60
+  fps: 20
+  zIndex: 2e9
+  className: 'spinner'
+  top: '50%'
+  left: '50%'
+  shadow: false
+  hwaccel: false
+  position: 'absolute'
+
+createSequenceHighlight = (oldCodon, newCodon, ind) ->
+  <span title={"#{oldCodon}->#{newCodon}"} className="seq-highlight" key={ind}>
+    {newCodon}
+  </span>
+
+diffSequence = (oldInput, newInput) ->
+  for i in [0..(newInput.length / 3)] by 1
+    oldCodon = oldInput[i..(i + 2)].toUpperCase()
+    newCodon = newInput[i..(i + 2)].toUpperCase()
+    if oldCodon isnt newCodon then createSequenceHighlight oldCodon, newCodon, i
+    else <span className="seq-no-highlight" key={i}>{newCodon}</span>
+
 OutputTextPanel = React.createClass
   getInitialState: ->
     outputText: ''
+    spinning: no
+    workerFn: null
+  componentDidMount: ->
+    workerFn = (msg) =>
+      {err, txt, oldSeq, seqObj, type} = msg.data
+      if err
+        alert txt.message
+        @setState
+          spinning: no
+          outputText: 'ERROR'
+      else
+        @setState
+          spinning: no
+          outputText: switch type
+            when 'DNA' then diffSequence oldSeq, seqObj.seq
+            when 'Amino' then <span className="seq-no-highlight">{seqObj}</span>
+    @props.worker.addEventListener 'message', workerFn
+    @setState workerFn: workerFn
+  componentWillUnmount: ->
+    @props.worker.removeEventListener 'message', @state.workerFn
+    @setState workerFn: null
   render: ->
     headers = [
       <p key="1">{@props.text}</p>
       <button key="2" type="button" className="btn btn-success"
-        onClick={=> @setState outputText: @props.getOutputFn()}>
+        onClick={=>
+          @setState spinning: yes
+          @props.worker.postMessage @props.getStateFn()}>
         {@props.buttonText}
-      </button>
-      ]
+      </button>]
     <LabeledPanel labelTitle={@props.name} outerClasses={@props.classes}
-      headers={headers}>
-      <ScrollingDiv txt={@state.outputText}/>
+      headers={headers}>{if @state.spinning then <Spinner config={spinCfg}/>
+      else <ScrollingDiv txt={@state.outputText}/>}
     </LabeledPanel>
 
 
