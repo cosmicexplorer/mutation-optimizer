@@ -205,8 +205,9 @@ class Count
     res
   @MutabilityScore: (seq, constrSeq, {singleWeight = null,
     weights = null} = {}) =>
+    seq = seq.toUpperCase()
+    constrSeq = seq.toUpperCase()
     if singleWeight then singleWeight seq, constrSeq else
-      f = null
       if weights
         # for weights not given (usually in nonOptions in strings.coffee), we
         # assume the default weights
