@@ -24,13 +24,17 @@ self.onmessage = (e) ->
     oldSeqScore = switch state.inputType
       when 'DNA' then Opt.Count.MutabilityScore oldSeq, oldSeq, {weights}
       when 'Amino' then null
-    self.postMessage
+    res =
       oldSeqObj:
         seq: oldSeq
         score: oldSeqScore
+        indices: Opt.Count.HotspotIndices oldSeq, oldSeq
       newSeqObj:
         seq: newSeq
         score: newSeqScore
+        indices: Opt.Count.HotspotIndices newSeq, newSeq
       type: state.inputType
+    console.log res
+    self.postMessage res
   catch err
     self.postMessage makeError err

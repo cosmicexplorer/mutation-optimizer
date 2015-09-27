@@ -192,6 +192,7 @@ module.exports =
     'Homologous Repeats':
       func: 'homologyRepeatCount'
       weight: .5
+      needsCurSeq: yes
     'Alkylation':
       func: 'alkylationSites'
       weight: 1

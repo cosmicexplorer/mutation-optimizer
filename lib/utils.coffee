@@ -8,6 +8,18 @@ Array.prototype.splitLength = (len) -> splitLength len, @
 sum = (arr) -> arr.reduce ((a, b) -> a + b), 0
 Array.prototype.sum = -> sum @
 
+indicesOfOccurrences = (str, substr, incrementBySubstr) ->
+  amountToIncrement = if incrementBySubstr then substr.length else 1
+  ind = str.indexOf substr
+  until ind is -1
+    prevInd = ind
+    ind = str.indexOf substr, ind + amountToIncrement
+    prevInd
+String.prototype.indicesOfOccurrences = (substr, inc) ->
+  indicesOfOccurrences @, substr, inc
+Array.prototype.indicesOfOccurrences = (substr, inc) ->
+  indicesOfOccurrences @, substr, inc
+
 countSubstr = (str, substr, incrementBySubstr) ->
   amountToIncrement = if incrementBySubstr then substr.length else 1
   count = 0
@@ -16,8 +28,8 @@ countSubstr = (str, substr, incrementBySubstr) ->
     ++count
     ind = str.indexOf substr, ind + amountToIncrement
   count
-String.prototype.countSubstr = (substr) -> countSubstr @, substr
-Array.prototype.countSubstr = (substr) -> countSubstr @, substr
+String.prototype.countSubstr = (substr, inc) -> countSubstr @, substr, inc
+Array.prototype.countSubstr = (substr, inc) -> countSubstr @, substr, inc
 
 ConvoluteKeysValues = (arr) ->
   arr = [arr] if arr.constructor isnt Array

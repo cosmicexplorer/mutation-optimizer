@@ -3,6 +3,7 @@ symbols = require './symbols'
 
 CODON_LENGTH = 3
 
+
 class SequenceError
   constructor: (@message, @type) ->
 
@@ -42,6 +43,7 @@ class Sequence
     #     strOrArr = strOrArr + end[0]
     # strOrArr
 
+
 ORF_THRESHOLD = 100
 
 getMinCount = (a, b) -> if a.count < b.count then a else b
@@ -132,72 +134,109 @@ class AminoAcidSequence extends Sequence
       .forEach (el) -> res[el.name] = el.counts
     res
 
-# TODO: consider using cached search tree or something if countOccurrences ends
-# up needing a bit more speed
+
 # TODO: reverse complement all of these from symbols instead of using them
 # directly
-# TODO: add homology repeats once mutation-optimization implemented
 class Count
   @DefaultHomologyCount: 5
   @RepeatRunCount: 4
   # all sequences here are assumed to be strings!!!
-  @WeightedPyrDimerMap: (->
+  @WeightedPyrDimerMap: do ->
     dimers = utils.ConvoluteKeysValues symbols.WeightedPyrDimers
     v = parseFloat v for k, v of dimers
-    dimers)()
+    dimers
+  @WeightedPyrDimerSet: k for k of @WeightedPyrDimerMap
+  @occurrenceIndices: (containerSet, symbolSet) ->
+    res = {}
+    for el in symbolSet
+      res[el] = containerSet.indicesOfOccurrences el
+    res
   @countOccurrences: (containerSet, symbolSet) ->
     symbolSet.map((el) -> containerSet.countSubstr el).sum()
+  @countOrInd: (containerSet, symbolSet, ind) ->
+    if ind then @occurrenceIndices containerSet, symbolSet
+    else @countOccurrences containerSet, symbolSet
   @splitCodons: (seq) -> seq.splitLength CODON_LENGTH
 
   # counts ensue
-  @rateLimitingCodons: (seq) => @splitCodons(seq).filter((el) ->
-    symbols.RateLimitingCodons.indexOf(el) isnt -1).length
+  @rateLimitingCodons: (seq, ind) =>
+    if ind then @occurrenceIndices @splitCodons(seq), symbols.RateLimitingCodons
+    else @splitCodons(seq).filter((el) ->
+      symbols.RateLimitingCodons.indexOf(el) isnt -1).length
   # DIFFERS FROM PY AT ds[0] because of indexing
-  @antiShineDelgarno: (seq) =>
-    @countOccurrences seq, symbols.AntiShineDelgarno
-  @ttDimerCount: (seq) =>
-    @countOccurrences seq, symbols.TTDimers
-  @otherPyrDimerCount: (seq) =>
-    @countOccurrences seq, symbols.OtherPyrDimers
-  @weightedPyrDimerCount: (seq) =>
-    (v * seq.countSubstr k for k, v of @WeightedPyrDimerMap).sum()
-  @methylationSites: (seq) =>
-    @countOccurrences seq, symbols.MethylationSites
-  @repeatRuns: (seq, unused, count = @RepeatRunCount) =>
+  @antiShineDelgarno: (seq, ind) =>
+    @countOrInd seq, symbols.AntiShineDelgarno, ind
+  @ttDimerCount: (seq, ind) =>
+    @countOrInd seq, symbols.TTDimers, ind
+  @otherPyrDimerCount: (seq, ind) =>
+    @countOrInd seq, symbols.OtherPyrDimers, ind
+  @weightedPyrDimerCount: (seq, ind) =>
+    if ind then @occurrenceIndices seq, @WeightedPyrDimerSet
+    else (v * seq.countSubstr k for k, v of @WeightedPyrDimerMap).sum()
+  @methylationSites: (seq, ind) =>
+    @countOrInd seq, symbols.MethylationSites, ind
+  @repeatRuns: (seq, ind) =>
     totalRuns = 0
     prevChar = null
     curRun = 0
-    for ch in seq
-      if ch is prevChar then ++curRun else curRun = 0
-      if curRun >= (count - 1) then ++totalRuns
+    inds = [] if ind
+    for ch, i in seq
+      if ch is prevChar then ++curRun
+      else
+        if (curRun >= (@RepeatRunCount - 1) and ind)
+          curInd = i - curRun
+          inds.push
+            start: curInd
+            str: seq[(curInd)..(curInd + curRun - 1)]
+        curRun = 0
+      if (curRun >= (@RepeatRunCount - 1) and not ind) then ++totalRuns
       prevChar = ch
-    totalRuns
+    if ind then inds else totalRuns
   # TODO: find more meaningful representation of this, also optimize
-  @homologyRepeatCount: (seq, currentSeq, count = @DefaultHomologyCount) =>
-    numRepeats = 0
-    for i in [0..(seq.length - count)] by 1
+  @homologyRepeatCount: (seq, currentSeq, ind) =>
+    numRepeats = 0 unless ind
+    inds = [] if ind
+    for i in [0..(seq.length - @DefaultHomologyCount)] by 1
       # assume sequence is only composed of A, C, T, G
-      reg = new RegExp seq[i..(i + count - 1)], 'gi'
-      ++numRepeats if (seq.match(reg) or []).length > 0
-    numRepeats
-  @deaminationSites: (seq) => @countOccurrences seq, symbols.DeaminationSites
+      str = seq[i..(i + @DefaultHomologyCount - 1)]
+      if ((seq.indexOf str, i + 1) isnt -1) or
+         (seq[0..(i - 1)].indexOf str isnt -1)
+        if ind then inds.push {start: i, str: str} else ++numRepeats
+    if ind then inds else numRepeats
+  @deaminationSites: (seq, ind) =>
+    @countOrInd seq, symbols.DeaminationSites, ind
   # DIFFERS FROM PY AT ds[0] because of indexing
-  @alkylationSites: (seq) => @countOccurrences seq, symbols.AlkylationSites
-  @oxidationSites: (seq) => @countOccurrences seq, symbols.OxidationSites
-  @miscSites: (seq) => @countOccurrences seq, symbols.MiscSites
+  @alkylationSites: (seq, ind) => @countOrInd seq, symbols.AlkylationSites, ind
+  @oxidationSites: (seq, ind) => @countOrInd seq, symbols.OxidationSites, ind
+  @miscSites: (seq, ind) => @countOrInd seq, symbols.MiscSites, ind
   # DIFFERS FROM PY AT ds[0] because of indexing
-  @hairpinSites: (seq) =>
-    symbols.HairpinSites.map((reg) -> (seq.match(reg) or []).length).sum()
-  @insertionSequences: (seq) =>
-    @countOccurrences seq, symbols.InsertionSequences
-  @RFC10Sites: (seq) => @countOccurrences seq, symbols.RFC10Sites
+  @hairpinSites: (seq, ind) =>
+    sites = symbols.HairpinSites
+    if ind
+      res = {}
+      for reg in sites
+        res[reg] = (match.index while (match = (reg.exec seq)?))
+      res
+    else sites.map((reg) -> (seq.match(reg) or []).length).sum()
+  @insertionSequences: (seq, ind) =>
+    @countOrInd seq, symbols.InsertionSequences, ind
+  @RFC10Sites: (seq, ind) => @countOrInd seq, symbols.RFC10Sites, ind
 
   @AllFuns: for k, v of symbols.FunctionWeights
-    {func: @[v.func], weight: v.weight, name: v.func, title: k}
+    f = @[v.func]
+    func: if v.needsCurSeq then f else do (f) -> (seq, constrSeq, ind) ->
+      f seq, ind
+    weight: v.weight
+    name: v.func
+    title: k
+  @SumAllWeights: (seq, constrSeq, weights) =>
+    @AllFuns.map((if weights
+        (f) -> (f.func seq, constrSeq) * weights[f.title]
+      else (f) -> (f.func seq, constrSeq) * f.weight)).sum()
   @AllCounts: (seq, constrSeq = seq) =>
     res = {}
     sum = 0
-    for el in @AllFuns
+    for el in @AllFunsCleaned
       cur = el.func seq, constrSeq
       sum += cur * el.weight
       res[el.name] = cur
@@ -213,10 +252,15 @@ class Count
         # assume the default weights
         for entry in @AllFuns
           weights[entry.title] = entry.weight unless weights[entry.title]
-        f = (w) -> w.func(seq, constrSeq) * weights[w.title]
-      else f = (w) -> w.func(seq, constrSeq) * w.weight
-      @AllFuns.map(f).sum()
+      @SumAllWeights seq, constrSeq, weights
+  @HotspotIndices: (seq, constrSeq) =>
+    seq = seq.toUpperCase()
+    constrSeq = constrSeq.toUpperCase()
+    @AllFuns.map (f) ->
+      indices: f.func seq, constrSeq, yes
+      title: f.title
 
+
 class DNASequence extends Sequence
   @ValidIUPACSyms: symbols.DNAIUPAC
   @CodonAminoMap: utils.ConvoluteKeysValues symbols.DNACodonAminoMap
@@ -295,6 +339,7 @@ class DNASequence extends Sequence
 #     res[k] = v - el.global[k]
 #   res).reduce red, {}
 
+
 module.exports = {
   SequenceError
   AminoAcidSequence
