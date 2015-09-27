@@ -31,7 +31,7 @@ abbreviations. Stop codons may be omitted, or entered as *, -, or X.'
   OutputPanelHeading: 'Codon Output'
   OutputButtonText: 'Go!'
   ClearButtonText: 'Clear'
-  OutputDirections: 'CHANGE THIS TO SOMETHING THAT MATTERS'
+  OutputDirections: 'The sequence below is optimized against mutation.'
   ParameterOptionsHeading: 'Input Parameters'
   DefaultParamLabel: 'Use Default Parameters'
   ParameterizedOptions: do ->
