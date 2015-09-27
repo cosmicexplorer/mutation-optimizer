@@ -96,7 +96,7 @@ class AminoAcidSequence extends Sequence
     for i in [0..(finalInd - 1)] by 1
       intermed = aminoString[i..(i + @constructor.MutationWindowLength)]
         .map((el) -> symbols.DNACodonAminoMap[el])
-      console.log aminoString unless intermed[0]
+      # console.log aminoString unless intermed[0]
       finalString[i] = intermed.getAllCombinations()
         .map((codonSeq) ->
           first: codonSeq[0]
