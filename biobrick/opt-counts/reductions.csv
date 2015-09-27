@@ -1,0 +1,12 @@
+name,reduction
+rateLimitingCodons,100
+weightedPyrDimerCount,44.17
+miscSites,89.71
+insertionSequences,100
+antiShineDelgarno,85.52
+deaminationSites,79.93
+repeatRuns,35
+alkylationSites,49.75
+methylationSites,86.21
+oxidationSites,62.67
+RFC10Sites,100
