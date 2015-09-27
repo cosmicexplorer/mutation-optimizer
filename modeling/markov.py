@@ -109,12 +109,40 @@ def numDiffsCodons(seq1, seq2):
 
 sys.path.insert(0, '../lib')
 import mutation_optimizer
+
+ConservativeAminoMap = {
+    'A': ['S'],
+    'R': ['K'],
+    'N': ['Q','H'],
+    'D': ['E'],
+    'Q': ['N'],
+    'C': ['S'],
+    'E': ['D'],
+    'G': ['P'],
+    'H': ['N', 'Q'],
+    'I': ['L', 'V'],
+    'L': ['I', 'V'],
+    'K': ['R', 'Q'],
+    'M': ['L', 'I'],
+    'F': ['M', 'L', 'Y'],
+    'S': ['T', 'G'],
+    'T': ['S', 'V'],
+    'W': ['Y'],
+    'Y': ['W', 'F'],
+    'V': ['I', 'L']
+}
+
 def numDiffsAminos(seq1, seq2):
     s = 0
     seq1Amino = mutation_optimizer.dna_to_aa_translation(seq1)
     seq2Amino = mutation_optimizer.dna_to_aa_translation(seq2)
     for i in range(len(seq1Amino)):
-        if seq1Amino[i] != seq2Amino[i]: s = s + 1
+        aminoA = seq1Amino[i]
+        aminoB = seq2Amino[i]
+        if ((aminoA != aminoB) and
+            (aminoA in ConservativeAminoMap) and
+            (aminoB not in ConservativeAminoMap[aminoA])):
+            s = s + 1
     return s / len(seq1Amino)
 
 if __name__ == "__main__":
@@ -156,14 +184,15 @@ if __name__ == "__main__":
     for s in seqs:
         amins = list(map(lambda el: el['aminos'], s[:numGenerations]))
         plt.plot(amins)
+    plt.xlim([0, 10 ** 2.7])
+    plt.ylim([.4, .9])
     plt.legend(['RFP BBa_E1010', 'T4 Holin BBa_K112000',
                 'LuxR autoinducer synthase BBa_C0061'], loc='lower right')
     plt.title('Markov Model of Amino Substitions per Generation')
     plt.xlabel('Generations (logarithmic scale)')
     plt.grid(True)
     plt.ylabel('% Substitutions (compared to original sequence)')
-    plt.xscale('log')
-    plt.savefig('aminos')
+    plt.savefig('aminos-conservative-substitions')
     plt.clf()
     for s in seqs:
         cods = list(map(lambda el: el['codons'], s[:numGenerations]))
@@ -175,4 +204,6 @@ if __name__ == "__main__":
     plt.ylabel('% Substitutions (compared to original sequence)')
     plt.title('Markov Model of Individual Base Substitions per Generation')
     plt.xscale('log')
+    plt.xlim([0, 10 ** 2.7])
+    plt.ylim([.3, .8])
     plt.savefig('codons')
