@@ -196,11 +196,13 @@ class Count
   @homologyRepeatCount: (seq, currentSeq, ind) =>
     numRepeats = 0 unless ind
     inds = [] if ind
-    for i in [0..(seq.length - @DefaultHomologyCount)] by 1
+    for i in [@DefaultHomologyCount..(seq.length - @DefaultHomologyCount)] by 1
       # assume sequence is only composed of A, C, T, G
-      str = seq[i..(i + @DefaultHomologyCount - 1)]
-      if ((seq.indexOf str, i + 1) isnt -1) or
-         (seq[0..(i - 1)].indexOf str isnt -1)
+      str = currentSeq[i..(i + @DefaultHomologyCount - 1)]
+      upperInd = (currentSeq.indexOf str, i + 1)
+      lowerInd = currentSeq[0..(i + @DefaultHomologyCount - 2)].indexOf str
+      if (lowerInd isnt -1) or
+         (upperInd isnt -1)
         if ind then inds.push {start: i, str: str} else ++numRepeats
     if ind then inds else numRepeats
   @deaminationSites: (seq, ind) =>
