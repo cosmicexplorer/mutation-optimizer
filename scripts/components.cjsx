@@ -160,11 +160,8 @@ OutputTextPanel = React.createClass
       @setState
         spinning: no
         outputText: <span>ERROR</span>
-      @props.percentageFn
-        pcntMutable: null
-        pcntChange: null
+      @props.clearFn()
     else
-      console.log "#{oldSeqObj.score}->#{newSeqObj.score}"
       @setState
         spinning: no
         outputText: switch type
@@ -172,11 +169,9 @@ OutputTextPanel = React.createClass
           when 'Amino' then <span className="seq-no-highlight">
             {newSeqObj.seq}
           </span>
-      retObj =
-        pcntMutable: newSeqObj.score / newSeqObj.seq.length * 100
-        pcntChange: (oldSeqObj.score - newSeqObj.score) / oldSeqObj.score * 100
-      console.log retObj
-      @props.percentageFn retObj
+      @props.percentageFn
+         pcntMutable: newSeqObj.score / newSeqObj.seq.length * 100
+         pcntChange: (oldSeqObj.score - newSeqObj.score) / oldSeqObj.score * 100
   componentDidMount: ->
     @props.worker.addEventListener 'message', @workerFn
   componentWillUnmount: ->
@@ -184,12 +179,20 @@ OutputTextPanel = React.createClass
   render: ->
     headers = [
       <p key="1">{@props.text}</p>
-      <button key="2" type="button" className="btn btn-success"
+      <button key="2" type="button" className="btn btn-danger panel-btn"
+        onClick={=>
+          @setState
+            spinning: no
+            outputText: ''
+          @props.clearFn()
+          @props.clearArgFn()}>
+        {@props.clearButtonText}
+      </button>
+      <button key="3" type="button" className="btn btn-success panel-btn"
         onClick={=>
           @setState spinning: yes
-
           @props.worker.postMessage @props.getStateFn()}>
-        {@props.buttonText}
+        {@props.goButtonText}
       </button>]
     <LabeledPanel labelTitle={@props.name} outerClasses={@props.classes}
       headers={headers}>{if @state.spinning then <Spinner config={spinCfg}/>

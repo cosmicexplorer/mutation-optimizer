@@ -88,14 +88,23 @@ MutationOptimizerApp = React.createClass
           <div className="col-md-5">
             <UI.OutputTextPanel text={S.OutputDirections}
               name={S.OutputPanelHeading} classes="display-item tall-object"
-              buttonText={S.OutputButtonText}
+              goButtonText={S.OutputButtonText}
+              clearButtonText={S.ClearButtonText}
               worker={worker} getStateFn={=>
                 res = appStateValid @state
                 if res
                   alert JSON.stringify res
                   {invalidState: yes}
                 else @state}
-              percentageFn={(arg) => @setState arg}/>
+              percentageFn={(arg) => @setState arg}
+              clearFn={=> @setState
+                pcntMutable: null
+                pcntChange: null}
+              clearArgFn={=>
+                @setState {
+                  parameterizedOptions: JSON.parse(JSON.stringify(
+                    S.parameterizedOptions))
+                }}/>
           </div>
         </div>
         <div className="row">
@@ -128,7 +137,7 @@ MutationOptimizerApp = React.createClass
                         fn={((e) => (value) =>
                           newOptions = @state.parameterizedOptions
                           newOptions[e] = value
-                          @setState(parameterizedOptions: newOptions))(key)}
+                          @setState parameterizedOptions: newOptions)(key)}
                         initialInput={val}
                         isDisabled=false />
                   }
