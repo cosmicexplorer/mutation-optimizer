@@ -1,3 +1,4 @@
+_ = require 'lodash'
 React = require 'react'
 Spinner = require 'react-spin'
 DetectResize = require 'detect-element-resize'
@@ -138,15 +139,18 @@ spinCfg =
   position: 'absolute'
 
 createSequenceHighlight = (oldCodon, newCodon, ind) ->
-  <span title={"#{oldCodon}->#{newCodon}"} className="seq-highlight" key={ind}>
-    {newCodon}
-  </span>
+  for i in [0..(newCodon.length - 1)] by 1
+    <span title={"#{oldCodon}->#{newCodon}"} className="seq-highlight"
+      key={"#{ind}.#{i}"}>
+      {newCodon[i]}
+    </span>
 
 diffSequence = (oldInput, newInput) ->
   for i in [0..(newInput.length / 3)] by 1
     oldCodon = oldInput[i..(i + 2)].toUpperCase()
     newCodon = newInput[i..(i + 2)].toUpperCase()
-    if oldCodon isnt newCodon then createSequenceHighlight oldCodon, newCodon, i
+    if oldCodon isnt newCodon
+      _.flatten createSequenceHighlight oldCodon, newCodon, i
     else <span className="seq-no-highlight" key={i}>{newCodon}</span>
 
 OutputTextPanel = React.createClass
