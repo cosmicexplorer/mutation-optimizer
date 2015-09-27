@@ -15,9 +15,10 @@ appStateValid = (state) ->
   inputs = (k for k of S.InputButtonTitlesDirections)
   typeValid = inputs.some((k) -> k is state.inputType)
   return "sequence type invalid" unless typeValid
-  for opt, val in state.parameterizedOptions
-    if isNaN parseFloat val
-      return "#{opt} argument cannot be parsed as a number"
+  if not state.isDefaultChecked
+    for opt, val of state.parameterizedOptions
+      if isNaN parseFloat val
+        return "#{opt} argument cannot be parsed as a number"
   null
 
 stringToColor = (str) ->
