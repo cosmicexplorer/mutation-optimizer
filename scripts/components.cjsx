@@ -189,8 +189,7 @@ OutputTextPanel = React.createClass
           @setState
             spinning: no
             outputText: ''
-          @props.clearFn()
-          @props.clearArgFn()}>
+          @props.clearFn()}>
         {@props.clearButtonText}
       </button>
       <button key="3" type="button" className="btn btn-success panel-btn"
@@ -319,14 +318,21 @@ DisableableItem = React.createClass
     </AdvancedOptions>
 
 
+percentRound = (num) -> Math.round(num * 100) / 100
+
 MeterDisplay = React.createClass
   render: ->
+    console.log [@props.numDisplay, percentRound @props.numDisplay]
+    numDisp = if @props.numDisplay then percentRound @props.numDisplay else 0
     <div className="meter-container">
       <label>{@props.lbl}</label>
       <meter max={@props.limits.max} low={@props.limits.low}
         value={@props.val} optimum={@props.limits.opt} className="meter-score">
-        {@props.val}% {@props.lbl}
+        {@props.val}: {@props.lbl}
       </meter>
+      <span className="meter-display">
+        {"#{numDisp}#{@props.decorator or ''}"}
+      </span>
     </div>
 
 MutabilityScoreboard = React.createClass
@@ -334,9 +340,13 @@ MutabilityScoreboard = React.createClass
     <AdvancedOptions labelText={@props.lbl}>
       <div className="display-item option-box mut-scoreboard">
         <MeterDisplay lbl={@props.mutableDisplay.label}
-          limits={@props.mutableDisplay} val={@props.pcntMutable}/>
+          limits={@props.mutableDisplay}
+          val={1/@props.pcntMutable if @props.pcntMutable}
+          numDisplay={@props.pcntMutable}/>
         <MeterDisplay lbl={@props.changeDisplay.label}
-          limits={@props.changeDisplay} val={@props.pcntChange}/>
+          limits={@props.changeDisplay} val={@props.pcntChange}
+          numDisplay={@props.pcntChange}
+          decorator="%"/>
       </div>
     </AdvancedOptions>
 

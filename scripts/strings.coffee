@@ -52,9 +52,9 @@ abbreviations. Stop codons may be omitted, or entered as *, -, or X.'
   MutabilityScoreboardLabel: 'Mutability Scoreboard'
   MutabilityLabel:
     label: 'Mutability Score'
-    low: 100
-    max: 200
-    opt: 0
+    low: .002
+    max: .01
+    opt: .01
   ChangeLabel:
     label: 'Percent Mutability Change'
     low: 50

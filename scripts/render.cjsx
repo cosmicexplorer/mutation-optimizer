@@ -99,12 +99,7 @@ MutationOptimizerApp = React.createClass
               percentageFn={(arg) => @setState arg}
               clearFn={=> @setState
                 pcntMutable: null
-                pcntChange: null}
-              clearArgFn={=>
-                @setState {
-                  parameterizedOptions: JSON.parse(JSON.stringify(
-                    S.parameterizedOptions))
-                }}/>
+                pcntChange: null}/>
           </div>
         </div>
         <div className="row">
