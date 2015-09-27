@@ -11,7 +11,9 @@ getSequenceOpt = (state) ->
 makeError = (txt) -> {err: yes, txt: txt}
 
 self.onmessage = (e) ->
-  self.postMessage makeError "invalid state" if e.invalidState
+  if e.data.invalidState
+    self.postMessage makeError "invalid state"
+    return
   state = e.data
   try
     weights = if state.isDefaultChecked then null else
@@ -19,7 +21,9 @@ self.onmessage = (e) ->
     newSeq = (getSequenceOpt state).seq
     newSeqScore = Opt.Count.MutabilityScore newSeq, newSeq, {weights}
     oldSeq = state.inputText
-    oldSeqScore = Opt.Count.MutabilityScore oldSeq, oldSeq, {weights}
+    oldSeqScore = switch state.inputType
+      when 'DNA' then Opt.Count.MutabilityScore oldSeq, oldSeq, {weights}
+      when 'Amino' then null
     self.postMessage
       oldSeqObj:
         seq: oldSeq
