@@ -229,6 +229,7 @@ class Count
     weight: v.weight
     name: v.func
     title: k
+    inFrame: v.inFrame
   @SumAllWeights: (seq, constrSeq, weights) =>
     @AllFuns.map((if weights
         (f) -> (f.func seq, constrSeq) * weights[f.title]

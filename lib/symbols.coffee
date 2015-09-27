@@ -168,6 +168,7 @@ module.exports =
     'Rate Limiting Codons':
       func: 'rateLimitingCodons'
       weight: 1000
+      inFrame: yes
     'Weighted Pyr Dimers':
       func: 'weightedPyrDimerCount'
       weight: 3
