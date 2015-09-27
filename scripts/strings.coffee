@@ -51,7 +51,7 @@ abbreviations. Stop codons may be omitted, or entered as *, -, or X.'
     'Rate Limiting Codons': 'Ignore rate-limiting codons.'
   MutabilityScoreboardLabel: 'Mutability Scoreboard'
   MutabilityLabel:
-    label: 'Mutability Score'
+    label: 'Output Mutability Score'
     low: .002
     max: .01
     opt: .01

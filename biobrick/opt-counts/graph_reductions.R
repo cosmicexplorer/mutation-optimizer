@@ -9,7 +9,7 @@ barplot(tbl$reduction,
         args.legend = list(x = "topright", bty = "n", inset = c(-.52, 0),
             cex = .8, title = "Type of Site Optimized Against"),
         col = sample(rainbow(length(tbl$reduction))),
-        main = "Reduction In Mutation Hotspots Counts After Specific Optimization",
+        main = "Reduction In Mutation Hotspot Counts After Specific Optimization",
         ylab = "% Reduction in Hotspot Sites")
 
 dev.off()
