@@ -146,12 +146,13 @@ createSequenceHighlight = (oldCodon, newCodon, ind) ->
     </span>
 
 diffSequence = (oldInput, newInput) ->
-  for i in [0..(newInput.length / 3)] by 1
+  for i in [0..(newInput.length)] by 3
     oldCodon = oldInput[i..(i + 2)].toUpperCase()
     newCodon = newInput[i..(i + 2)].toUpperCase()
-    if oldCodon isnt newCodon
-      _.flatten createSequenceHighlight oldCodon, newCodon, i
-    else <span className="seq-no-highlight" key={i}>{newCodon}</span>
+    _.flatten if oldCodon isnt newCodon
+      createSequenceHighlight oldCodon, newCodon, i
+    else for j in [0..(newCodon.length - 1)] by 1
+      <span className="seq-no-highlight" key={"#{i}.#{j}"}>{newCodon[j]}</span>
 
 OutputTextPanel = React.createClass
   getInitialState: ->
