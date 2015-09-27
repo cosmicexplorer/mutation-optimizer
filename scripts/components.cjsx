@@ -324,11 +324,13 @@ MeterDisplay = React.createClass
   render: ->
     console.log [@props.numDisplay, percentRound @props.numDisplay]
     numDisp = if @props.numDisplay then percentRound @props.numDisplay else 0
+    numDisp = 0 unless isFinite numDisp
+    val = if isFinite @props.val then @props.val else 0
     <div className="meter-container">
       <label>{@props.lbl}</label>
       <meter max={@props.limits.max} low={@props.limits.low}
-        value={@props.val} optimum={@props.limits.opt} className="meter-score">
-        {@props.val}: {@props.lbl}
+        value={val} optimum={@props.limits.opt} className="meter-score">
+        {val}: {@props.lbl}
       </meter>
       <span className="meter-display">
         {"#{numDisp}#{@props.decorator or ''}"}

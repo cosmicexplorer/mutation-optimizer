@@ -3,7 +3,7 @@ Opt = require '../lib/mutation-optimizer'
 getSequenceOpt = (state) ->
   aminoSeq = switch state.inputType
     when 'DNA' then (new Opt.DNASequence state.inputText).toAminoSeq()
-    when 'Amino' then new Opt.AminoAcidSequence @state.inputText
+    when 'Amino' then new Opt.AminoAcidSequence state.inputText
     else throw new Opt.SequenceError "sequence type invalid", "bad seq type"
   weights = if state.isDefaultChecked then null else state.parameterizedOptions
   aminoSeq.minimizeMutation weights
@@ -21,14 +21,15 @@ self.onmessage = (e) ->
     newSeq = (getSequenceOpt state).seq
     newSeqScore = Opt.Count.MutabilityScore newSeq, newSeq, {weights}
     oldSeq = state.inputText
-    oldSeqScore = switch state.inputType
-      when 'DNA' then Opt.Count.MutabilityScore oldSeq, oldSeq, {weights}
-      when 'Amino' then null
+    [oldSeqScore, oldIndices] = switch state.inputType
+      when 'DNA' then [Opt.Count.MutabilityScore oldSeq, oldSeq, {weights}
+        Opt.Count.HotspotIndices oldSeq, oldSeq]
+      when 'Amino' then [null, null]
     res =
       oldSeqObj:
         seq: oldSeq
         score: oldSeqScore
-        indices: Opt.Count.HotspotIndices oldSeq, oldSeq
+        indices: oldIndices
       newSeqObj:
         seq: newSeq
         score: newSeqScore
