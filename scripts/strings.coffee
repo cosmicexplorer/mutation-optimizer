@@ -48,4 +48,15 @@ abbreviations. Stop codons may be omitted, or entered as *, -, or X.'
     'Evolution': 'Optimize for increased evolutionary potential.'
     'RFC10': 'Turn on RFC10 site recognition.'
     'Rate Limiting Codons': 'Ignore rate-limiting codons.'
+  MutabilityScoreboardLabel: 'Mutability Scoreboard'
+  MutabilityLabel:
+    label: 'Mutability Score'
+    low: 100
+    max: 200
+    opt: 0
+  ChangeLabel:
+    label: 'Percent Mutability Change'
+    low: 50
+    max: 100
+    opt: 100
   VersionName: 'mutation-optimizer v0.0'

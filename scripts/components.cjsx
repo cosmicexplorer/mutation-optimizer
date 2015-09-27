@@ -153,35 +153,41 @@ OutputTextPanel = React.createClass
   getInitialState: ->
     outputText: ''
     spinning: no
-    workerFn: null
+  workerFn: (msg) ->
+    {err, txt, oldSeqObj, newSeqObj, type} = msg.data
+    if err
+      alert txt.message if txt.message
+      @setState
+        spinning: no
+        outputText: <span>ERROR</span>
+      @props.percentageFn
+        pcntMutable: null
+        pcntChange: null
+    else
+      console.log "#{oldSeqObj.score}->#{newSeqObj.score}"
+      @setState
+        spinning: no
+        outputText: switch type
+          when 'DNA' then diffSequence oldSeqObj.seq, newSeqObj.seq
+          when 'Amino' then <span className="seq-no-highlight">
+            {newSeqObj.seq}
+          </span>
+      retObj =
+        pcntMutable: newSeqObj.score / newSeqObj.seq.length * 100
+        pcntChange: (oldSeqObj.score - newSeqObj.score) / oldSeqObj.score * 100
+      console.log retObj
+      @props.percentageFn retObj
   componentDidMount: ->
-    workerFn = (msg) =>
-      {err, txt, oldSeqObj, newSeqObj, type} = msg.data
-      if err
-        alert txt.message
-        @setState
-          spinning: no
-          outputText: <span>ERROR</span>
-      else
-        console.log "#{oldSeqObj.score}->#{newSeqObj.score}"
-        @setState
-          spinning: no
-          outputText: switch type
-            when 'DNA' then diffSequence oldSeqObj.seq, newSeqObj.seq
-            when 'Amino' then <span className="seq-no-highlight">
-              {newSeqObj.seq}
-            </span>
-    @props.worker.addEventListener 'message', workerFn
-    @setState workerFn: workerFn
+    @props.worker.addEventListener 'message', @workerFn
   componentWillUnmount: ->
-    @props.worker.removeEventListener 'message', @state.workerFn
-    @setState workerFn: null
+    @props.worker.removeEventListener 'message', @workerFn
   render: ->
     headers = [
       <p key="1">{@props.text}</p>
       <button key="2" type="button" className="btn btn-success"
         onClick={=>
           @setState spinning: yes
+
           @props.worker.postMessage @props.getStateFn()}>
         {@props.buttonText}
       </button>]
@@ -305,6 +311,28 @@ DisableableItem = React.createClass
     </AdvancedOptions>
 
 
+MeterDisplay = React.createClass
+  render: ->
+    <div className="meter-container">
+      <label>{@props.lbl}</label>
+      <meter max={@props.limits.max} low={@props.limits.low}
+        value={@props.val} optimum={@props.limits.opt} className="meter-score">
+        {@props.val}% {@props.lbl}
+      </meter>
+    </div>
+
+MutabilityScoreboard = React.createClass
+  render: ->
+    <AdvancedOptions labelText={@props.lbl}>
+      <div className="display-item option-box mut-scoreboard">
+        <MeterDisplay lbl={@props.mutableDisplay.label}
+          limits={@props.mutableDisplay} val={@props.pcntMutable}/>
+        <MeterDisplay lbl={@props.changeDisplay.label}
+          limits={@props.changeDisplay} val={@props.pcntChange}/>
+      </div>
+    </AdvancedOptions>
+
+
 module.exports = {
   ItemList
   SearchList
@@ -318,4 +346,5 @@ module.exports = {
   OptionsBox
   ParameterizedOption
   DisableableItem
+  MutabilityScoreboard
 }

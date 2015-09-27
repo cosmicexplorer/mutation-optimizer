@@ -41,6 +41,8 @@ MutationOptimizerApp = React.createClass
       res
     parameterizedOptions: JSON.parse JSON.stringify S.ParameterizedOptions
     isDefaultChecked: no
+    pcntMutable: null
+    pcntChange: null
   render: ->
     <div>
       <nav className="navbar navbar-default navbar-static-top">
@@ -92,7 +94,8 @@ MutationOptimizerApp = React.createClass
                 if res
                   alert JSON.stringify res
                   {invalidState: yes}
-                else @state}/>
+                else @state}
+              percentageFn={(arg) => @setState arg}/>
           </div>
         </div>
         <div className="row">
@@ -112,7 +115,7 @@ MutationOptimizerApp = React.createClass
             }
             </UI.AdvancedOptions>
           </div>
-          <div className="col-md-10">
+          <div className="col-md-8">
             <UI.DisableableItem heading={S.DefaultParamLabel}
               fn={(checked) => @setState isDefaultChecked: checked}
               labelText={S.ParameterOptionsHeading}>
@@ -132,6 +135,12 @@ MutationOptimizerApp = React.createClass
                 </UI.OptionsBox>
               }
             </UI.DisableableItem>
+          </div>
+          <div className="col-md-2">
+            <UI.MutabilityScoreboard lbl={S.MutabilityScoreboardLabel}
+              pcntMutable={@state.pcntMutable} pcntChange={@state.pcntChange}
+              mutableDisplay={S.MutabilityLabel}
+              changeDisplay={S.ChangeLabel}/>
           </div>
         </div>
       </div>
