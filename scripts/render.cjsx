@@ -75,7 +75,9 @@ MutationOptimizerApp = React.createClass
             <UI.SearchList classes="display-item tall-object listing"
               name={S.SearchPanelHeading} defaultInput={S.SearchPanelDefault}
               items={S.SpeciesToSearch}
-              fn={(obj) => @setState selectedElement: obj} />
+              fn={(obj) =>
+                @setState selectedElement: obj
+                alert S.NoSpeciesText} />
           </div>
           <div className="col-md-5">
             <UI.InputTextPanel name={S.InputPanelHeading}

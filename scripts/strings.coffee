@@ -60,4 +60,6 @@ abbreviations. Stop codons may be omitted, or entered as *, -, or X.'
     low: 50
     max: 100
     opt: 100
+  NoSpeciesText: 'Species Selection is not currently functional. Please check
+  the documentation page.'
   VersionName: 'mutation-optimizer v0.0'
