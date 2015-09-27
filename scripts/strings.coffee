@@ -8,7 +8,7 @@ module.exports =
   DefaultSpeciesText: "No species selected."
   DefaultSpeciesColor: '#333'
   NavbarButtons:
-    'Documentation': 'documentation.html'
+    'Documentation': 'Documentation'
   SearchPanelHeading: 'Search Species'
   SearchPanelDefault: 'Search for...'
   SpeciesToSearch: [
