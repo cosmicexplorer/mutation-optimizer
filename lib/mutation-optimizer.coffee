@@ -4,8 +4,9 @@ symbols = require './symbols'
 CODON_LENGTH = 3
 
 
-class SequenceError
+class SequenceError extends Error
   constructor: (@message, @type) ->
+    super @message
 
 ### SEQ CHECK IMPROVEMENTS
 - make orf finder, and only act upon each orf in sequence, not sequence as a
