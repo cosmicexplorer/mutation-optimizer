@@ -88,7 +88,7 @@ class AminoAcidSequence extends Sequence
   # weights is an associative object mapping the "title" of each weight given in
   # symbols.FunctionWeights to a floating-point number
   minimizeMutation: ({singleWeight = null, cleanedSeq = null,
-    weights = null} = {}) ->
+    weights = null, adv = null} = {}) ->
     aminoString = cleanedSeq or @clean().split ''
     finalString = new Array aminoString.length
     # TODO: consider version where we greedily choose current index of codon
@@ -104,7 +104,8 @@ class AminoAcidSequence extends Sequence
         .map((codonSeq) ->
           first: codonSeq[0]
           count: Count.MutabilityScore(
-            codonSeq.join(''), finalString[..(i - 1)], {singleWeight, weights}))
+            codonSeq.join(''), finalString[..(i - 1)],
+              {singleWeight, weights, adv}))
         .reduce(getMinCount)
         .first
     aminoString[finalInd..(finalInd + @constructor.MutationWindowLength - 1)]
@@ -227,15 +228,8 @@ class Count
 
   @ModifyWeightsOnAdvancedOptions: (weights, opt, val) ->
     switch opt
-      # when 'Conservative Substitutions' then
-      when 'Evolution'
-        if not val then weights else
-          res = {}
-          res[k] = -v for k, v of weights
-          res
       when 'RFC10'
-        weights['RFC10'] = if val
-          symbols.FunctionWeights['RFC10'].weight
+        weights['RFC10'] = if val then symbols.FunctionWeights['RFC10'].weight
         else 0
         weights
       when 'Rate Limiting Codons'
@@ -264,16 +258,16 @@ class Count
       res[el.name] = cur
     res.mutability_score = sum
     res
-  @MutabilityScore: (seq, constrSeq, {singleWeight = null,
-    weights = null} = {}) =>
+  @MutabilityScore: (seq, constrSeq = null, {singleWeight = null,
+    weights = null, adv = null} = {}) =>
     seq = seq.toUpperCase()
     constrSeq = seq.toUpperCase()
     if singleWeight then singleWeight seq, constrSeq else
-      if weights
-        # for weights not given (usually in nonOptions in strings.coffee), we
-        # assume the default weights
-        for entry in @AllFuns
-          weights[entry.title] = entry.weight unless weights[entry.title]
+      if weights and adv? then for k, v of adv
+        weights = @ModifyWeightsOnAdvancedOptions weights, k, v
+        # else for entry in @AllFuns
+        #   weights[entry.title] = entry.weight unless weights[entry.title]
+      # console.log weights
       @SumAllWeights seq, constrSeq, weights
   @HotspotIndices: (seq, constrSeq) =>
     seq = seq.toUpperCase()

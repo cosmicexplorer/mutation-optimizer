@@ -6,15 +6,15 @@ getSequenceOpt = (state) ->
     when 'Amino' then new Opt.AminoAcidSequence state.inputText
     else throw new Opt.SequenceError "sequence type invalid", "bad seq type"
   weights = if state.isDefaultChecked then null else state.parameterizedOptions
-  aminoSeq.minimizeMutation weights
+  console.log [weights, state.advancedOptions]
+  aminoSeq.minimizeMutation {weights, adv: state.advancedOptions}
 
 makeError = (txt) -> {err: yes, txt: txt}
 
-self.onmessage = (e) ->
-  if e.data.invalidState
-    self.postMessage makeError "invalid state"
+handleMessage = ({data: state, cb = self.postMessage}) ->
+  if state.invalidState
+    cb makeError "invalid state"
     return
-  state = e.data
   try
     weights = if state.isDefaultChecked then null else
       state.parameterizedOptions
@@ -35,7 +35,11 @@ self.onmessage = (e) ->
         score: newSeqScore
         indices: Opt.Count.HotspotIndices newSeq, newSeq
       type: state.inputType
-    console.log res
-    self.postMessage res
+    # console.log res
+    cb res
   catch err
-    self.postMessage makeError err
+    cb makeError err
+
+self.onmessage = handleMessage
+
+module.exports = handleMessage

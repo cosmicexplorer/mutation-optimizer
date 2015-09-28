@@ -29,6 +29,8 @@ stringToColor = (str) ->
     color += ('00' + ((hash << i * 3) & 0xFF).toString(16)).slice(-2)
   color
 
+console.log S.ParameterizedOptions
+
 MutationOptimizerApp = React.createClass
   getInitialState: ->
     selectedElement: null
@@ -38,7 +40,10 @@ MutationOptimizerApp = React.createClass
       res = JSON.parse JSON.stringify S.AdvancedOptions
       res[k] = no for k, v of res
       res
-    parameterizedOptions: JSON.parse JSON.stringify S.ParameterizedOptions
+    parameterizedOptions: do ->
+      res = JSON.parse JSON.stringify S.ParameterizedOptions
+      res[k] = parseFloat v for k, v of res
+      res
     isDefaultChecked: no
     pcntMutable: null
     pcntChange: null

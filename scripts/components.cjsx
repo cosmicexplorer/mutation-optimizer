@@ -191,15 +191,11 @@ OutputTextPanel = React.createClass
             outputText: ''
           @props.clearFn()}>
         {@props.clearButtonText}
-      </button>
+        </button>
       <button key="3" type="button" className="btn btn-success panel-btn"
         onClick={=>
           @setState spinning: yes
-          # async
-          # self.postMessage @props.getStateFn()
-          # sync
-          require('./optimize-worker') {data: @props.getStateFn()}, (msg) =>
-            @workerFn {data: msg}}>
+          @props.worker.postMessage @props.getStateFn()}>
         {@props.goButtonText}
       </button>]
     <LabeledPanel labelTitle={@props.name} outerClasses={@props.classes}
@@ -324,7 +320,6 @@ percentRound = (num) -> Math.round(num * 100) / 100
 
 MeterDisplay = React.createClass
   render: ->
-    console.log [@props.numDisplay, percentRound @props.numDisplay]
     numDisp = if @props.numDisplay then percentRound @props.numDisplay else 0
     numDisp = 0 unless isFinite numDisp
     val = if isFinite @props.val then @props.val else 0
