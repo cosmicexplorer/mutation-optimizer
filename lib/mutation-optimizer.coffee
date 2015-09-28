@@ -225,6 +225,24 @@ class Count
     @countOrInd seq, symbols.InsertionSequences, ind
   @RFC10Sites: (seq, ind) => @countOrInd seq, symbols.RFC10Sites, ind
 
+  @ModifyWeightsOnAdvancedOptions: (weights, opt, val) ->
+    switch opt
+      # when 'Conservative Substitutions' then
+      when 'Evolution'
+        if not val then weights else
+          res = {}
+          res[k] = -v for k, v of weights
+          res
+      when 'RFC10'
+        weights['RFC10'] = if val
+          symbols.FunctionWeights['RFC10'].weight
+        else 0
+        weights
+      when 'Rate Limiting Codons'
+        weights['Rate Limiting Codons'] = if val then 0
+        else symbols.FunctionWeights['Rate Limiting Codons'].weight
+        weights
+      else weights
   @AllFuns: for k, v of symbols.FunctionWeights
     f = @[v.func]
     func: if v.needsCurSeq then f else do (f) -> (seq, constrSeq, ind) ->

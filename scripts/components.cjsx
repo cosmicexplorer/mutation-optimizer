@@ -195,7 +195,11 @@ OutputTextPanel = React.createClass
       <button key="3" type="button" className="btn btn-success panel-btn"
         onClick={=>
           @setState spinning: yes
-          @props.worker.postMessage @props.getStateFn()}>
+          # async
+          # self.postMessage @props.getStateFn()
+          # sync
+          require('./optimize-worker') {data: @props.getStateFn()}, (msg) =>
+            @workerFn {data: msg}}>
         {@props.goButtonText}
       </button>]
     <LabeledPanel labelTitle={@props.name} outerClasses={@props.classes}
@@ -271,8 +275,6 @@ AdvancedOptions = React.createClass
 
 ### parameterized options ###
 OptionsBox = React.createClass
-  getInitialState: ->
-    disabled: @props.disabled
   render: ->
     <div className={"options-box row " + @props.newClasses}>
       {
