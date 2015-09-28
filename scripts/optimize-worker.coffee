@@ -6,7 +6,6 @@ getSequenceOpt = (state) ->
     when 'Amino' then new Opt.AminoAcidSequence state.inputText
     else throw new Opt.SequenceError "sequence type invalid", "bad seq type"
   weights = if state.isDefaultChecked then null else state.parameterizedOptions
-  console.log [weights, state.advancedOptions]
   aminoSeq.minimizeMutation {weights, adv: state.advancedOptions}
 
 makeError = (txt) -> {err: yes, txt: txt}

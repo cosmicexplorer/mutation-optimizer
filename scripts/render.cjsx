@@ -29,8 +29,6 @@ stringToColor = (str) ->
     color += ('00' + ((hash << i * 3) & 0xFF).toString(16)).slice(-2)
   color
 
-console.log S.ParameterizedOptions
-
 MutationOptimizerApp = React.createClass
   getInitialState: ->
     selectedElement: null
