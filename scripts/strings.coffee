@@ -45,7 +45,6 @@ abbreviations. Stop codons may be omitted, or entered as *, -, or X.'
     res
   AdvancedOptionsHeading: 'Advanced Options'
   AdvancedOptions:
-    'Conservative Substitutions': 'Allow conservative amino acid substitutions.'
     'Evolution': 'Optimize for increased evolutionary potential.'
     'RFC10': 'Turn on RFC10 site recognition.'
     'Rate Limiting Codons': 'Ignore rate-limiting codons.'
