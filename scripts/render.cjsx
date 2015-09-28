@@ -2,7 +2,6 @@ React = require 'react'
 S = require './strings'
 UI = require './components'
 
-
 worker = null
 if typeof Worker is undefined
   alert "This page uses Web Workers, a feature your browser does not support. To
