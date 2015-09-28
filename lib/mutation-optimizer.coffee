@@ -268,7 +268,8 @@ class Count
         # else for entry in @AllFuns
         #   weights[entry.title] = entry.weight unless weights[entry.title]
       # console.log weights
-      @SumAllWeights seq, constrSeq, weights
+      res = @SumAllWeights seq, constrSeq, weights
+      if adv?['Evolution'] then res * -1 else res
   @HotspotIndices: (seq, constrSeq) =>
     seq = seq.toUpperCase()
     constrSeq = constrSeq.toUpperCase()
