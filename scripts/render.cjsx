@@ -85,7 +85,8 @@ MutationOptimizerApp = React.createClass
             <UI.InputTextPanel name={S.InputPanelHeading}
               classes="display-item tall-object"
               typeFn={(val) => @setState inputType: val}
-              inputFn={(val) => @setState inputText: val}
+              inputFn={(val) =>
+                @setState inputText: val.toUpperCase().replace /\s/g, ""}
               buttons={S.InputButtonTitlesDirections}
               selectedButton={@state.inputType} />
           </div>
