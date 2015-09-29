@@ -21,7 +21,8 @@ class Sequence
   check: (seq) -> seq
   constructor: (seq) ->
     # coerce to string
-    @seq = (if seq.constructor is Array then seq.join '' else seq).toUpperCase()
+    @seq = (if seq.constructor is Array then seq.join '' else seq)
+      .toUpperCase().replace /\s/g, ""
   clean: ->
     cst = @constructor
     cleaned = @seq.split('').map((sym) =>
