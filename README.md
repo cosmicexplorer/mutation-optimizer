@@ -11,6 +11,6 @@ A [web interface](https://cosmicexplorer.github.io/mutation-optimizer), js trans
 
 # Instructions
 
-Run make. The site makes no external requests, so just open the local file "index.html" in your browser.
+Run `make`. The site makes no external requests, so just open the local file "index.html" in your browser.
 
 A more detailed documentation of the executable and upper-level api will be available when that is written.
